@@ -8,8 +8,12 @@
   <meta name="apple-mobile-web-app-title" content="Mét sê gi" />
   <title>Mét sê gi</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-    html, body { background: #f2f2f7; height: 100%; overflow: hidden; }
+    :root {
+      --theme-main: #0084ff;
+      --theme-grad: linear-gradient(135deg, #0099ff, #0066ff);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { background: #ffffff; height: 100%; overflow: hidden; }
     body {
       display: flex;
       flex-direction: column;
@@ -17,164 +21,573 @@
       background-position: center;
       background-repeat: no-repeat;
     }
+
+    /* Header chuẩn Messenger */
     header {
       background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: calc(env(safe-area-inset-top) + 10px) 10px 10px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: calc(env(safe-area-inset-top) + 8px) 14px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-      z-index: 10;
-      gap: 4px;
+      border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+      z-index: 20;
     }
-    header h1 { font-size: 15px; font-weight: 700; color: #000; white-space: nowrap; }
-    .header-actions { display: flex; align-items: center; gap: 4px; }
-    .icon-btn {
-      background: rgba(0,0,0,0.06);
-      border: none;
-      border-radius: 8px;
-      width: 30px;
-      height: 30px;
-      font-size: 14px;
+    .chat-partner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--theme-grad);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .online-dot {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 11px;
+      height: 11px;
+      background: #31a24c;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+    .partner-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .partner-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #050505;
+      line-height: 1.2;
+    }
+    .partner-status {
+      font-size: 12px;
+      color: #65676b;
+      margin-top: 1px;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .role-pill {
+      background: #f0f2f5;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--theme-main);
       cursor: pointer;
     }
-    .icon-btn:active { background: rgba(0,0,0,0.15); }
-    .role-switch { display: flex; background: #e5e5ea; border-radius: 8px; padding: 2px; }
-    .role-btn { border: none; background: transparent; padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 6px; color: #666; cursor: pointer; }
-    .role-btn.active { background: #fff; color: #007aff; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+    .header-icon-btn {
+      background: #f0f2f5;
+      border: none;
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--theme-main);
+      cursor: pointer;
+    }
+    .header-icon-btn:active { transform: scale(0.93); }
 
+    /* Khu vực tin nhắn */
     #chat-box {
       flex: 1;
       overflow-y: auto;
-      padding: 14px;
+      padding: 12px 12px 8px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
       -webkit-overflow-scrolling: touch;
     }
-    .msg {
-      max-width: 78%;
-      padding: 9px 13px;
-      border-radius: 18px;
-      font-size: 16px;
-      line-height: 1.4;
-      word-wrap: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    .msg-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 2px;
     }
-    .msg.me { align-self: flex-end; background: #007aff; color: #fff; border-bottom-right-radius: 4px; }
-    .msg.other { align-self: flex-start; background: rgba(255,255,255,0.92); color: #000; border-bottom-left-radius: 4px; }
-    .msg.ai {
-      align-self: flex-start;
-      background: linear-gradient(135deg, #eef4ff, #f5ebff);
-      color: #1c1c1e;
-      border: 1px solid #d0bfff;
-      border-bottom-left-radius: 4px;
-    }
-    .ai-badge { font-size: 11px; font-weight: 700; color: #6741d9; margin-bottom: 3px; }
-    .msg img { max-width: 100%; border-radius: 12px; display: block; margin-bottom: 2px; }
-    .msg audio { max-width: 215px; height: 36px; display: block; margin-bottom: 2px; }
-    .msg-time { font-size: 10px; opacity: 0.65; margin-top: 3px; text-align: right; }
+    .msg-group.new-block { margin-top: 10px; }
+    .msg-group.me { align-items: flex-end; }
+    .msg-group.other { align-items: flex-start; }
 
+    .sender-name-tag {
+      font-size: 11px;
+      font-weight: 600;
+      color: #65676b;
+      margin: 0 0 3px 36px;
+      background: rgba(255,255,255,0.75);
+      padding: 1px 6px;
+      border-radius: 6px;
+    }
+    .bubble-line {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      max-width: 80%;
+    }
+    .msg-group.me .bubble-line { flex-direction: row-reverse; }
+
+    .mini-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--theme-grad);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .mini-avatar.hidden { visibility: hidden; }
+
+    .bubble {
+      padding: 9px 14px;
+      border-radius: 20px;
+      font-size: 15.5px;
+      line-height: 1.38;
+      word-wrap: break-word;
+      position: relative;
+      transition: transform 0.1s ease;
+    }
+    .bubble:active { transform: scale(0.98); }
+
+    /* Màu bong bóng Messenger */
+    .msg-group.me .bubble {
+      background: var(--theme-grad);
+      color: #ffffff;
+      border-bottom-right-radius: 5px;
+    }
+    .msg-group.other .bubble {
+      background: #f0f2f5;
+      color: #050505;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .bubble.media-bubble {
+      padding: 3px;
+      background: transparent !important;
+      box-shadow: none;
+    }
+    .bubble img {
+      max-width: 230px;
+      max-height: 300px;
+      border-radius: 18px;
+      display: block;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .bubble audio {
+      max-width: 215px;
+      height: 36px;
+      display: block;
+    }
+    .bubble.heart-only {
+      background: transparent !important;
+      font-size: 38px;
+      padding: 2px 4px;
+      line-height: 1.1;
+    }
+
+    .msg-meta {
+      font-size: 11px;
+      color: #65676b;
+      margin-top: 3px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.75);
+      display: none;
+    }
+    .msg-meta.show-always { display: inline-block; font-weight: 600; }
+
+    /* Bong bóng đang nhập chuẩn Messenger */
+    #typing-bubble-row {
+      display: none;
+      align-items: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .typing-dots {
+      background: #f0f2f5;
+      padding: 11px 15px;
+      border-radius: 20px;
+      border-bottom-left-radius: 5px;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .typing-dots span {
+      width: 7px;
+      height: 7px;
+      background: #8a8d91;
+      border-radius: 50%;
+      animation: messengerTyping 1.3s infinite ease-in-out;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
+    @keyframes messengerTyping {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* Footer nhập liệu chuẩn Messenger */
     footer {
       background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 8px 8px calc(env(safe-area-inset-bottom) + 10px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px);
       display: flex;
-      gap: 5px;
-      align-items: center;
-      border-top: 1px solid rgba(0,0,0,0.1);
+      align-items: flex-end;
+      gap: 8px;
+      border-top: 0.5px solid rgba(0, 0, 0, 0.08);
     }
-    .tool-btn {
-      background: #f0f0f5;
+    .action-icon {
+      background: transparent;
       border: none;
-      border-radius: 50%;
       width: 34px;
-      height: 34px;
-      font-size: 16px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--theme-main);
       cursor: pointer;
       flex-shrink: 0;
+      border-radius: 50%;
     }
-    .tool-btn.recording {
+    .action-icon:active { background: #f0f2f5; }
+    .action-icon.recording {
       background: #ff3b30;
       color: #fff;
-      animation: pulse 1s infinite;
+      animation: pulseRec 1s infinite;
     }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    #msg-input {
+    @keyframes pulseRec { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+    .input-pill {
       flex: 1;
-      min-width: 0;
-      border: 1px solid #d1d1d6;
+      background: #f0f2f5;
       border-radius: 20px;
-      padding: 8px 12px;
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+    }
+    #msg-input {
+      width: 100%;
+      border: none;
+      background: transparent;
       font-size: 16px;
+      line-height: 1.35;
       outline: none;
-      background: #fff;
+      color: #050505;
+      resize: none;
+      max-height: 96px;
     }
     #send-btn {
-      background: #007aff;
-      color: #fff;
+      background: transparent;
       border: none;
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      font-size: 14px;
-      font-weight: bold;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--theme-main);
+      font-size: 20px;
       cursor: pointer;
       flex-shrink: 0;
     }
+
+    /* Bottom Sheet Cài đặt phòng chat */
+    #sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 50;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    #settings-sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      padding: 12px 18px calc(env(safe-area-inset-bottom) + 20px);
+      z-index: 60;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    }
+    #settings-sheet.open { transform: translateY(0); }
+    .sheet-handle {
+      width: 38px;
+      height: 5px;
+      background: #d1d1d6;
+      border-radius: 3px;
+      margin: 0 auto 14px;
+    }
+    .sheet-title {
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      color: #050505;
+    }
+    .sheet-section {
+      margin-bottom: 16px;
+    }
+    .sheet-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #65676b;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .role-toggle-box {
+      display: flex;
+      background: #f0f2f5;
+      border-radius: 12px;
+      padding: 3px;
+    }
+    .role-choice {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 9px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #65676b;
+      cursor: pointer;
+    }
+    .role-choice.active {
+      background: #fff;
+      color: var(--theme-main);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .color-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .color-swatch {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .color-swatch.active {
+      border-color: #050505;
+      transform: scale(1.1);
+    }
+    .menu-btn {
+      width: 100%;
+      background: #f0f2f5;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #050505;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .menu-btn.danger { color: #ff3b30; background: #fff0f0; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Mét sê gi ❤️</h1>
-    <div class="header-actions">
-      <button type="button" class="icon-btn" id="key-btn" title="Nhập Gemini API Key">🔑</button>
-      <button type="button" class="icon-btn" id="bg-btn" title="Đổi ảnh nền">🖼️</button>
-      <button type="button" class="icon-btn" id="clear-btn" title="Xóa đoạn chat">🗑️</button>
-      <div class="role-switch">
-        <button type="button" class="role-btn" id="btn-anh">Anh</button>
-        <button type="button" class="role-btn" id="btn-em">Em</button>
+    <div class="chat-partner">
+      <div class="avatar-wrap">
+        <div class="avatar" id="partner-avatar">E</div>
+        <div class="online-dot"></div>
       </div>
+      <div class="partner-info">
+        <div class="partner-name" id="partner-name">Em</div>
+        <div class="partner-status" id="partner-status">Đang hoạt động</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button type="button" class="role-pill" id="quick-role-btn">Tôi là: Anh</button>
+      <button type="button" class="header-icon-btn" id="open-settings-btn" title="Tùy chỉnh">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+      </button>
     </div>
   </header>
 
   <input type="file" id="bg-input" accept="image/*" style="display:none" />
   <input type="file" id="img-input" accept="image/*" style="display:none" />
 
-  <div id="chat-box"></div>
+  <div id="chat-box">
+    <div id="messages-container"></div>
+    <div id="typing-bubble-row">
+      <div class="mini-avatar" id="typing-avatar">E</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
 
   <footer>
-    <button type="button" class="tool-btn" id="img-btn" title="Gửi ảnh">📷</button>
-    <button type="button" class="tool-btn" id="voice-btn" title="Ghi âm">🎙️</button>
-    <button type="button" class="tool-btn" id="ai-btn" title="Hỏi Gemini">✨</button>
-    <input type="text" id="msg-input" placeholder="Nhắn tin hoặc @ai..." autocomplete="off" />
-    <button type="button" id="send-btn">➤</button>
+    <button type="button" class="action-icon" id="img-btn" title="Gửi ảnh">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+    </button>
+    <button type="button" class="action-icon" id="voice-btn" title="Ghi âm">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+    </button>
+    <div class="input-pill">
+      <textarea id="msg-input" rows="1" placeholder="Nhắn tin..."></textarea>
+    </div>
+    <button type="button" id="send-btn" title="Gửi">❤️</button>
   </footer>
+
+  <!-- Bottom Sheet Tùy chỉnh -->
+  <div id="sheet-backdrop"></div>
+  <div id="settings-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Tùy chỉnh cuộc trò chuyện</div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Bạn đang nhắn với tư cách</div>
+      <div class="role-toggle-box">
+        <button type="button" class="role-choice" id="choice-anh">Anh</button>
+        <button type="button" class="role-choice" id="choice-em">Em</button>
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Màu chủ đề (Đồng bộ cả 2 bên)</div>
+      <div class="color-grid" id="color-grid"></div>
+    </div>
+
+    <div class="sheet-section">
+      <button type="button" class="menu-btn" id="rename-btn">
+        <span>✏️ Đổi biệt danh Anh / Em</span>
+        <span id="rename-preview" style="color:#65676b;font-size:13px;">Anh & Em</span>
+      </button>
+      <button type="button" class="menu-btn" id="bg-btn">
+        <span>🖼️ Đổi ảnh nền cuộc trò chuyện</span>
+        <span style="color:var(--theme-main);font-size:13px;">Chọn ảnh</span>
+      </button>
+      <button type="button" class="menu-btn" id="remove-bg-btn" style="display:none;">
+        <span>🧹 Gỡ ảnh nền hiện tại</span>
+      </button>
+      <button type="button" class="menu-btn danger" id="clear-btn">
+        <span>🗑️ Xóa toàn bộ đoạn chat</span>
+      </button>
+    </div>
+  </div>
 
   <script>
     var currentRole = localStorage.getItem("chat_role") || "Anh";
     var allMessages = [];
+    var roomSettings = {
+      nameAnh: "Anh",
+      nameEm: "Em",
+      themeIndex: 0,
+      bgImage: "",
+      typingAnh: 0,
+      typingEm: 0
+    };
 
-    var savedBg = localStorage.getItem("chat_bg");
-    if (savedBg) {
-      document.body.style.backgroundImage = "url(" + savedBg + ")";
+    var themes = [
+      { main: "#0084ff", grad: "linear-gradient(135deg, #0099ff, #0066ff)" },
+      { main: "#ff2d55", grad: "linear-gradient(135deg, #ff5e7e, #ff2d55)" },
+      { main: "#8e44ad", grad: "linear-gradient(135deg, #a55eea, #7d3cff)" },
+      { main: "#2ecc71", grad: "linear-gradient(135deg, #2ed573, #1eae60)" },
+      { main: "#ff7f50", grad: "linear-gradient(135deg, #ff9f43, #ee5253)" },
+      { main: "#2f3542", grad: "linear-gradient(135deg, #57606f, #2f3542)" }
+    ];
+
+    // Tạo bảng chọn màu
+    var colorGrid = document.getElementById("color-grid");
+    themes.forEach(function(t, idx) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "color-swatch";
+      btn.style.background = t.grad;
+      btn.dataset.index = idx;
+      colorGrid.appendChild(btn);
+    });
+
+    function getDisplayName(roleKey) {
+      return roleKey === "Anh" ? (roomSettings.nameAnh || "Anh") : (roomSettings.nameEm || "Em");
     }
 
-    function updateRoleUI() {
-      document.getElementById("btn-anh").className = "role-btn" + (currentRole === "Anh" ? " active" : "");
-      document.getElementById("btn-em").className = "role-btn" + (currentRole === "Em" ? " active" : "");
+    function applyRoomSettings() {
+      var t = themes[roomSettings.themeIndex || 0] || themes[0];
+      document.documentElement.style.setProperty("--theme-main", t.main);
+      document.documentElement.style.setProperty("--theme-grad", t.grad);
+
+      var swatches = document.querySelectorAll(".color-swatch");
+      swatches.forEach(function(s, i) {
+        s.classList.toggle("active", i === (roomSettings.themeIndex || 0));
+      });
+
+      var nameAnh = getDisplayName("Anh");
+      var nameEm = getDisplayName("Em");
+      var otherRole = currentRole === "Anh" ? "Em" : "Anh";
+      var otherName = getDisplayName(otherRole);
+
+      document.getElementById("partner-name").textContent = otherName;
+      document.getElementById("partner-avatar").textContent = otherName.charAt(0).toUpperCase();
+      document.getElementById("typing-avatar").textContent = otherName.charAt(0).toUpperCase();
+      document.getElementById("quick-role-btn").textContent = "Tôi: " + getDisplayName(currentRole);
+      document.getElementById("choice-anh").textContent = nameAnh;
+      document.getElementById("choice-em").textContent = nameEm;
+      document.getElementById("rename-preview").textContent = nameAnh + " & " + nameEm;
+
+      document.getElementById("choice-anh").classList.toggle("active", currentRole === "Anh");
+      document.getElementById("choice-em").classList.toggle("active", currentRole === "Em");
+
+      if (roomSettings.bgImage) {
+        document.body.style.backgroundImage = "url(" + roomSettings.bgImage + ")";
+        document.getElementById("remove-bg-btn").style.display = "flex";
+      } else {
+        document.body.style.backgroundImage = "none";
+        document.getElementById("remove-bg-btn").style.display = "none";
+      }
+
+      var otherTypingTime = otherRole === "Anh" ? roomSettings.typingAnh : roomSettings.typingEm;
+      var isOtherTyping = otherTypingTime && (Date.now() - otherTypingTime < 4200);
+      var typingRow = document.getElementById("typing-bubble-row");
+      var statusText = document.getElementById("partner-status");
+      if (isOtherTyping) {
+        typingRow.style.display = "flex";
+        statusText.textContent = "Đang nhập...";
+        statusText.style.color = t.main;
+        var chatBox = document.getElementById("chat-box");
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } else {
+        typingRow.style.display = "none";
+        statusText.textContent = "Đang hoạt động";
+        statusText.style.color = "#65676b";
+      }
     }
 
     function escapeHTML(str) {
@@ -184,14 +597,28 @@
     }
 
     function renderMessages() {
-      var chatBox = document.getElementById("chat-box");
-      chatBox.innerHTML = "";
+      var container = document.getElementById("messages-container");
+      container.innerHTML = "";
+
+      var lastMyMsgIndex = -1;
+      for (var j = allMessages.length - 1; j >= 0; j--) {
+        if (allMessages[j].sender === currentRole) {
+          lastMyMsgIndex = j;
+          break;
+        }
+      }
+
       for (var i = 0; i < allMessages.length; i++) {
         var msg = allMessages[i];
-        var isAI = msg.sender === "Gemini";
+        var prevMsg = i > 0 ? allMessages[i - 1] : null;
+        var nextMsg = i < allMessages.length - 1 ? allMessages[i + 1] : null;
+
         var isMe = msg.sender === currentRole;
-        var div = document.createElement("div");
-        div.className = "msg " + (isAI ? "ai" : (isMe ? "me" : "other"));
+        var isFirstInGroup = !prevMsg || prevMsg.sender !== msg.sender;
+        var isLastInGroup = !nextMsg || nextMsg.sender !== msg.sender;
+
+        var group = document.createElement("div");
+        group.className = "msg-group " + (isMe ? "me" : "other") + (isFirstInGroup ? " new-block" : "");
 
         var timeStr = "";
         if (msg.timestamp && msg.timestamp.toDate) {
@@ -199,51 +626,78 @@
           timeStr = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
         }
 
-        var contentHTML = isAI ? "<div class='ai-badge'>✨ Gemini</div>" : "";
-        if (msg.type === "image" && msg.media) {
-          contentHTML += "<img src='" + msg.media + "' alt='ảnh' />";
-        } else if (msg.type === "audio" && msg.media) {
-          contentHTML += "<audio controls playsinline src='" + msg.media + "'></audio>";
-        } else {
-          contentHTML += "<div>" + escapeHTML(msg.text || "").replace(/\n/g, "<br>") + "</div>";
+        if (!isMe && isFirstInGroup) {
+          var nameTag = document.createElement("div");
+          nameTag.className = "sender-name-tag";
+          nameTag.textContent = getDisplayName(msg.sender);
+          group.appendChild(nameTag);
         }
 
-        div.innerHTML = contentHTML + "<div class='msg-time'>" + timeStr + "</div>";
-        chatBox.appendChild(div);
+        var line = document.createElement("div");
+        line.className = "bubble-line";
+
+        if (!isMe) {
+          var av = document.createElement("div");
+          av.className = "mini-avatar" + (isLastInGroup ? "" : " hidden");
+          av.textContent = getDisplayName(msg.sender).charAt(0).toUpperCase();
+          line.appendChild(av);
+        }
+
+        var bubble = document.createElement("div");
+        bubble.className = "bubble";
+        if (msg.type === "image" && msg.media) {
+          bubble.classList.add("media-bubble");
+          bubble.innerHTML = "<img src='" + msg.media + "' alt='ảnh' />";
+        } else if (msg.type === "audio" && msg.media) {
+          bubble.innerHTML = "<audio controls playsinline src='" + msg.media + "'></audio>";
+        } else {
+          var txt = msg.text || "";
+          if (txt === "❤️") bubble.classList.add("heart-only");
+          bubble.innerHTML = escapeHTML(txt).replace(/\n/g, "<br>");
+        }
+
+        var meta = document.createElement("div");
+        meta.className = "msg-meta";
+        if (isMe && i === lastMyMsgIndex) {
+          meta.classList.add("show-always");
+          meta.textContent = (msg.seen ? "Đã xem" : "Đã nhận") + (timeStr ? " • " + timeStr : "");
+        } else {
+          meta.textContent = timeStr;
+        }
+
+        bubble.onclick = function(mEl) {
+          return function() {
+            if (!mEl.classList.contains("show-always")) {
+              mEl.style.display = mEl.style.display === "inline-block" ? "none" : "inline-block";
+            }
+          };
+        }(meta);
+
+        line.appendChild(bubble);
+        group.appendChild(line);
+        if (meta.textContent) group.appendChild(meta);
+        container.appendChild(group);
       }
+
+      var chatBox = document.getElementById("chat-box");
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    document.getElementById("btn-anh").onclick = function() {
-      currentRole = "Anh";
-      localStorage.setItem("chat_role", "Anh");
-      updateRoleUI();
-      renderMessages();
-    };
-
-    document.getElementById("btn-em").onclick = function() {
-      currentRole = "Em";
-      localStorage.setItem("chat_role", "Em");
-      updateRoleUI();
-      renderMessages();
-    };
-
-    document.getElementById("key-btn").onclick = function() {
-      var currentKey = localStorage.getItem("gemini_api_key") || "";
-      var newKey = prompt("Dán mã Gemini API Key (AQ.Ab8... hoặc AIzaSy...) vào đây:", currentKey);
-      if (newKey !== null) {
-        localStorage.setItem("gemini_api_key", newKey.trim());
-        alert(newKey.trim() ? "Đã lưu API Key Gemini!" : "Đã xóa API Key.");
-      }
-    };
-
-    document.getElementById("ai-btn").onclick = function() {
-      var input = document.getElementById("msg-input");
-      if (!input.value.startsWith("@ai ")) {
-        input.value = "@ai " + input.value;
-      }
-      input.focus();
-    };
+    // Điều khiển Bottom Sheet
+    var sheet = document.getElementById("settings-sheet");
+    var backdrop = document.getElementById("sheet-backdrop");
+    function openSheet() {
+      backdrop.style.display = "block";
+      setTimeout(function() { backdrop.style.opacity = "1"; sheet.classList.add("open"); }, 10);
+    }
+    function closeSheet() {
+      sheet.classList.remove("open");
+      backdrop.style.opacity = "0";
+      setTimeout(function() { backdrop.style.display = "none"; }, 260);
+    }
+    document.getElementById("open-settings-btn").onclick = openSheet;
+    document.getElementById("quick-role-btn").onclick = openSheet;
+    backdrop.onclick = closeSheet;
 
     function compressImage(file, maxW, quality, callback) {
       var reader = new FileReader();
@@ -263,29 +717,13 @@
       reader.readAsDataURL(file);
     }
 
-    document.getElementById("bg-btn").onclick = function() {
-      document.getElementById("bg-input").click();
-    };
-    document.getElementById("bg-input").onchange = function(e) {
-      var file = e.target.files[0];
-      if (!file) return;
-      compressImage(file, 900, 0.7, function(dataUrl) {
-        try {
-          localStorage.setItem("chat_bg", dataUrl);
-          document.body.style.backgroundImage = "url(" + dataUrl + ")";
-        } catch (err) {
-          alert("Ảnh nền quá nặng, hãy chọn ảnh nhẹ hơn.");
-        }
-      });
-      e.target.value = "";
-    };
-
-    updateRoleUI();
+    setInterval(applyRoomSettings, 1500);
+    applyRoomSettings();
   </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC3F8UwljVUkAjV9FdnchYRjQgLdiYt_eA",
@@ -300,86 +738,147 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const messagesRef = collection(db, "messages");
+    const roomDocRef = doc(db, "settings", "room");
+
+    onSnapshot(roomDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        window.roomSettings = { ...window.roomSettings, ...docSnap.data() };
+        window.applyRoomSettings();
+        window.renderMessages();
+      }
+    });
+
+    async function updateRoomSetting(data) {
+      try {
+        await setDoc(roomDocRef, data, { merge: true });
+      } catch (e) {
+        alert("Lỗi đồng bộ: " + e.message);
+      }
+    }
+
+    function markUnreadAsSeen() {
+      if (document.hidden) return;
+      window.allMessages.forEach(async (m) => {
+        if (m.sender !== window.currentRole && !m.seen) {
+          try {
+            await updateDoc(doc(db, "messages", m.id), { seen: true });
+          } catch (e) {}
+        }
+      });
+    }
+    document.addEventListener("visibilitychange", markUnreadAsSeen);
 
     onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), (snapshot) => {
       window.allMessages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       window.renderMessages();
+      markUnreadAsSeen();
+    });
+
+    function switchRole(role) {
+      window.currentRole = role;
+      localStorage.setItem("chat_role", role);
+      window.applyRoomSettings();
+      window.renderMessages();
+      markUnreadAsSeen();
+    }
+    document.getElementById("choice-anh").onclick = () => switchRole("Anh");
+    document.getElementById("choice-em").onclick = () => switchRole("Em");
+
+    document.querySelectorAll(".color-swatch").forEach(btn => {
+      btn.onclick = async () => {
+        const idx = parseInt(btn.dataset.index, 10);
+        await updateRoomSetting({ themeIndex: idx });
+      };
+    });
+
+    document.getElementById("rename-btn").onclick = async () => {
+      const newAnh = prompt("Biệt danh của Anh:", window.roomSettings.nameAnh || "Anh");
+      if (newAnh === null) return;
+      const newEm = prompt("Biệt danh của Em:", window.roomSettings.nameEm || "Em");
+      if (newEm === null) return;
+      await updateRoomSetting({
+        nameAnh: newAnh.trim() || "Anh",
+        nameEm: newEm.trim() || "Em"
+      });
+    };
+
+    document.getElementById("bg-btn").onclick = () => document.getElementById("bg-input").click();
+    document.getElementById("bg-input").onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      window.compressImage(file, 720, 0.55, async (dataUrl) => {
+        if (dataUrl.length > 850000) {
+          alert("Ảnh nền quá nặng, hãy chọn ảnh khác nhẹ hơn!");
+          return;
+        }
+        await updateRoomSetting({ bgImage: dataUrl });
+        window.closeSheet();
+      });
+      e.target.value = "";
+    };
+
+    document.getElementById("remove-bg-btn").onclick = async () => {
+      await updateRoomSetting({ bgImage: "" });
+      window.closeSheet();
+    };
+
+    const msgInput = document.getElementById("msg-input");
+    const sendBtn = document.getElementById("send-btn");
+    let lastTypingSent = 0;
+
+    msgInput.addEventListener("input", () => {
+      msgInput.style.height = "auto";
+      msgInput.style.height = Math.min(msgInput.scrollHeight, 96) + "px";
+      sendBtn.textContent = msgInput.value.trim() ? "➤" : "❤️";
+
+      const now = Date.now();
+      if (now - lastTypingSent > 2000) {
+        lastTypingSent = now;
+        const field = window.currentRole === "Anh" ? "typingAnh" : "typingEm";
+        updateRoomSetting({ [field]: now });
+      }
     });
 
     async function sendPayload(payload) {
+      const typingField = window.currentRole === "Anh" ? "typingAnh" : "typingEm";
       try {
         await addDoc(messagesRef, {
-          sender: payload.sender || window.currentRole,
+          sender: window.currentRole,
+          seen: false,
           timestamp: serverTimestamp(),
           ...payload
         });
+        await updateRoomSetting({ [typingField]: 0 });
       } catch (e) {
         alert("Lỗi gửi tin: " + e.message);
       }
     }
 
-    async function askGemini(question) {
-      const apiKey = localStorage.getItem("gemini_api_key");
-      if (!apiKey) {
-        alert("Bạn chưa nhập Gemini API Key! Bấm biểu tượng 🔑 trên góc trên để dán Key nhé.");
+    async function handleSend() {
+      const text = msgInput.value.trim();
+      if (!text) {
+        await sendPayload({ type: "text", text: "❤️" });
         return;
       }
-
-      const recentContext = window.allMessages
-        .slice(-8)
-        .filter(m => m.type === "text" && m.text)
-        .map(m => `${m.sender}: ${m.text}`)
-        .join("\n");
-
-      const nowStr = new Date().toLocaleString("vi-VN", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-      const promptText = `Bạn là trợ lý AI vui vẻ tham gia cùng cặp đôi Anh và Em trong phòng chat riêng. Thời gian hiện tại là: ${nowStr}. Hãy trả lời ngắn gọn, tự nhiên bằng tiếng Việt.\n\nLịch sử chat gần đây:\n${recentContext}\n\n${window.currentRole} hỏi: ${question}`;
-
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
-        });
-        const data = await res.json();
-        if (data.error) {
-          alert("Lỗi Gemini: " + data.error.message);
-          return;
-        }
-        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini không có phản hồi.";
-        await sendPayload({ sender: "Gemini", type: "text", text: reply.trim() });
-      } catch (err) {
-        alert("Không kết nối được Gemini: " + err.message);
-      }
-    }
-
-    async function handleSendText() {
-      const input = document.getElementById("msg-input");
-      const text = input.value.trim();
-      if (!text) return;
-      input.value = "";
-
+      msgInput.value = "";
+      msgInput.style.height = "auto";
+      sendBtn.textContent = "❤️";
       await sendPayload({ type: "text", text: text });
-
-      if (text.toLowerCase().startsWith("@ai")) {
-        const question = text.replace(/^@ai\s*/i, "").trim() || "Chào bạn!";
-        await askGemini(question);
-      }
     }
 
-    document.getElementById("send-btn").onclick = handleSendText;
-    document.getElementById("msg-input").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") { e.preventDefault(); handleSendText(); }
+    sendBtn.onclick = handleSend;
+    msgInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
     });
 
-    document.getElementById("img-btn").onclick = function() {
-      document.getElementById("img-input").click();
-    };
-    document.getElementById("img-input").onchange = function(e) {
+    document.getElementById("img-btn").onclick = () => document.getElementById("img-input").click();
+    document.getElementById("img-input").onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      window.compressImage(file, 720, 0.65, async function(dataUrl) {
+      window.compressImage(file, 720, 0.65, async (dataUrl) => {
         await sendPayload({ type: "image", media: dataUrl });
       });
       e.target.value = "";
@@ -389,7 +888,7 @@
     let audioChunks = [];
     const voiceBtn = document.getElementById("voice-btn");
 
-    voiceBtn.onclick = async function() {
+    voiceBtn.onclick = async () => {
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop();
         voiceBtn.classList.remove("recording");
@@ -406,7 +905,7 @@
           stream.getTracks().forEach(t => t.stop());
           const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/mp4" });
           if (blob.size > 700000) {
-            alert("Đoạn ghi âm hơi dài (tối đa khoảng 25 giây), hãy thử ghi ngắn hơn nhé!");
+            alert("Đoạn ghi âm tối đa khoảng 25 giây, hãy ghi ngắn hơn nhé!");
             return;
           }
           const reader = new FileReader();
@@ -422,12 +921,12 @@
       }
     };
 
-    document.getElementById("clear-btn").onclick = async function() {
+    document.getElementById("clear-btn").onclick = async () => {
       if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
       try {
         const snap = await getDocs(messagesRef);
-        const promises = snap.docs.map(d => deleteDoc(doc(db, "messages", d.id)));
-        await Promise.all(promises);
+        await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "messages", d.id))));
+        window.closeSheet();
       } catch (e) {
         alert("Lỗi khi xóa: " + e.message);
       }
