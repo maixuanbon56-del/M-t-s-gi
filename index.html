@@ -230,7 +230,7 @@
 
     document.getElementById("key-btn").onclick = function() {
       var currentKey = localStorage.getItem("gemini_api_key") || "";
-      var newKey = prompt("Dán mã Gemini API Key (AIzaSy...) vào đây:", currentKey);
+      var newKey = prompt("Dán mã Gemini API Key (AQ.Ab8... hoặc AIzaSy...) vào đây:", currentKey);
       if (newKey !== null) {
         localStorage.setItem("gemini_api_key", newKey.trim());
         alert(newKey.trim() ? "Đã lưu API Key Gemini!" : "Đã xóa API Key.");
@@ -395,42 +395,4 @@
         return;
       }
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) audioChunks.push(e.data);
-        };
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/mp4" });
-          if (blob.size > 700000) {
-            alert("Đoạn ghi âm hơi dài (tối đa khoảng 25 giây), hãy thử ghi ngắn hơn nhé!");
-            return;
-          }
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            await sendPayload({ type: "audio", media: reader.result });
-          };
-          reader.readAsDataURL(blob);
-        };
-        mediaRecorder.start();
-        voiceBtn.classList.add("recording");
-      } catch (err) {
-        alert("Không bật được micro: " + err.message);
-      }
-    };
-
-    document.getElementById("clear-btn").onclick = async function() {
-      if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
-      try {
-        const snap = await getDocs(messagesRef);
-        const promises = snap.docs.map(d => deleteDoc(doc(db, "messages", d.id)));
-        await Promise.all(promises);
-      } catch (e) {
-        alert("Lỗi khi xóa: " + e.message);
-      }
-    };
-  </script>
-</body>
-</html>
+        const stream = await navigator
