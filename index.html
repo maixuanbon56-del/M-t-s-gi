@@ -10,32 +10,145 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
     html, body { background: #f2f2f7; height: 100%; overflow: hidden; }
-    body { display: flex; flex-direction: column; }
-    header { background: rgba(255,255,255,0.95); padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e5e5ea; }
-    header h1 { font-size: 17px; font-weight: 600; color: #000; }
+    body {
+      display: flex;
+      flex-direction: column;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    header {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: calc(env(safe-area-inset-top) + 10px) 12px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      z-index: 10;
+      gap: 6px;
+    }
+    header h1 { font-size: 16px; font-weight: 700; color: #000; white-space: nowrap; }
+    .header-actions { display: flex; align-items: center; gap: 6px; }
+    .icon-btn {
+      background: rgba(0,0,0,0.06);
+      border: none;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .icon-btn:active { background: rgba(0,0,0,0.15); }
     .role-switch { display: flex; background: #e5e5ea; border-radius: 8px; padding: 2px; }
-    .role-btn { border: none; background: transparent; padding: 6px 16px; font-size: 14px; font-weight: 600; border-radius: 6px; color: #666; cursor: pointer; }
+    .role-btn { border: none; background: transparent; padding: 5px 12px; font-size: 13px; font-weight: 600; border-radius: 6px; color: #666; cursor: pointer; }
     .role-btn.active { background: #fff; color: #007aff; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-    #chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; -webkit-overflow-scrolling: touch; }
-    .msg { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.4; word-wrap: break-word; }
+
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .msg {
+      max-width: 78%;
+      padding: 9px 13px;
+      border-radius: 18px;
+      font-size: 16px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
     .msg.me { align-self: flex-end; background: #007aff; color: #fff; border-bottom-right-radius: 4px; }
-    .msg.other { align-self: flex-start; background: #e5e5ea; color: #000; border-bottom-left-radius: 4px; }
-    .msg-time { font-size: 10px; opacity: 0.65; margin-top: 4px; text-align: right; }
-    footer { background: #fff; padding: 10px 12px calc(env(safe-area-inset-bottom) + 12px); display: flex; gap: 8px; align-items: center; border-top: 1px solid #e5e5ea; }
-    #msg-input { flex: 1; border: 1px solid #d1d1d6; border-radius: 20px; padding: 10px 16px; font-size: 16px; outline: none; background: #f9f9f9; }
-    #send-btn { background: #007aff; color: #fff; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .msg.other { align-self: flex-start; background: rgba(255,255,255,0.92); color: #000; border-bottom-left-radius: 4px; }
+    .msg img { max-width: 100%; border-radius: 12px; display: block; margin-bottom: 2px; }
+    .msg audio { max-width: 215px; height: 36px; display: block; margin-bottom: 2px; }
+    .msg-time { font-size: 10px; opacity: 0.65; margin-top: 3px; text-align: right; }
+
+    footer {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 8px 10px calc(env(safe-area-inset-bottom) + 10px);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    .tool-btn {
+      background: #f0f0f5;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .tool-btn.recording {
+      background: #ff3b30;
+      color: #fff;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    #msg-input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #d1d1d6;
+      border-radius: 20px;
+      padding: 9px 14px;
+      font-size: 16px;
+      outline: none;
+      background: #fff;
+    }
+    #send-btn {
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 15px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>Mét sê gi ❤️</h1>
-    <div class="role-switch">
-      <button type="button" class="role-btn" id="btn-anh">Anh</button>
-      <button type="button" class="role-btn" id="btn-em">Em</button>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" id="bg-btn" title="Đổi ảnh nền">🖼️</button>
+      <button type="button" class="icon-btn" id="clear-btn" title="Xóa đoạn chat">🗑️</button>
+      <div class="role-switch">
+        <button type="button" class="role-btn" id="btn-anh">Anh</button>
+        <button type="button" class="role-btn" id="btn-em">Em</button>
+      </div>
     </div>
   </header>
+
+  <input type="file" id="bg-input" accept="image/*" style="display:none" />
+  <input type="file" id="img-input" accept="image/*" style="display:none" />
+
   <div id="chat-box"></div>
+
   <footer>
+    <button type="button" class="tool-btn" id="img-btn" title="Gửi ảnh">📷</button>
+    <button type="button" class="tool-btn" id="voice-btn" title="Ghi âm">🎙️</button>
     <input type="text" id="msg-input" placeholder="Nhắn tin..." autocomplete="off" />
     <button type="button" id="send-btn">➤</button>
   </footer>
@@ -43,6 +156,11 @@
   <script>
     var currentRole = localStorage.getItem("chat_role") || "Anh";
     var allMessages = [];
+
+    var savedBg = localStorage.getItem("chat_bg");
+    if (savedBg) {
+      document.body.style.backgroundImage = "url(" + savedBg + ")";
+    }
 
     function updateRoleUI() {
       document.getElementById("btn-anh").className = "role-btn" + (currentRole === "Anh" ? " active" : "");
@@ -63,12 +181,23 @@
         var isMe = msg.sender === currentRole;
         var div = document.createElement("div");
         div.className = "msg " + (isMe ? "me" : "other");
+
         var timeStr = "";
         if (msg.timestamp && msg.timestamp.toDate) {
           var d = msg.timestamp.toDate();
           timeStr = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
         }
-        div.innerHTML = "<div>" + escapeHTML(msg.text || "") + "</div><div class='msg-time'>" + timeStr + "</div>";
+
+        var contentHTML = "";
+        if (msg.type === "image" && msg.media) {
+          contentHTML = "<img src='" + msg.media + "' alt='ảnh' />";
+        } else if (msg.type === "audio" && msg.media) {
+          contentHTML = "<audio controls playsinline src='" + msg.media + "'></audio>";
+        } else {
+          contentHTML = "<div>" + escapeHTML(msg.text || "") + "</div>";
+        }
+
+        div.innerHTML = contentHTML + "<div class='msg-time'>" + timeStr + "</div>";
         chatBox.appendChild(div);
       }
       chatBox.scrollTop = chatBox.scrollHeight;
@@ -88,12 +217,47 @@
       renderMessages();
     };
 
+    function compressImage(file, maxW, quality, callback) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement("canvas");
+          var ratio = Math.min(maxW / img.width, 1);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          callback(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById("bg-btn").onclick = function() {
+      document.getElementById("bg-input").click();
+    };
+    document.getElementById("bg-input").onchange = function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, 900, 0.7, function(dataUrl) {
+        try {
+          localStorage.setItem("chat_bg", dataUrl);
+          document.body.style.backgroundImage = "url(" + dataUrl + ")";
+        } catch (err) {
+          alert("Ảnh nền quá nặng, hãy chọn ảnh nhẹ hơn.");
+        }
+      });
+      e.target.value = "";
+    };
+
     updateRoleUI();
   </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC3F8UwljVUkAjV9FdnchYRjQgLdiYt_eA",
@@ -110,32 +274,97 @@
     const messagesRef = collection(db, "messages");
 
     onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), (snapshot) => {
-      window.allMessages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      window.allMessages = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       window.renderMessages();
-    }, (error) => {
-      alert("Lỗi kết nối Firebase: " + error.message);
     });
 
-    async function handleSend() {
+    async function sendPayload(payload) {
+      try {
+        await addDoc(messagesRef, {
+          sender: window.currentRole,
+          timestamp: serverTimestamp(),
+          ...payload
+        });
+      } catch (e) {
+        alert("Lỗi gửi tin: " + e.message);
+      }
+    }
+
+    async function handleSendText() {
       const input = document.getElementById("msg-input");
       const text = input.value.trim();
       if (!text) return;
       input.value = "";
-      try {
-        await addDoc(messagesRef, {
-          sender: window.currentRole,
-          text: text,
-          timestamp: serverTimestamp()
-        });
-      } catch (e) {
-        alert("Không gửi được: " + e.message);
-      }
+      await sendPayload({ type: "text", text: text });
     }
 
-    document.getElementById("send-btn").onclick = handleSend;
+    document.getElementById("send-btn").onclick = handleSendText;
     document.getElementById("msg-input").addEventListener("keypress", function(e) {
-      if (e.key === "Enter") { e.preventDefault(); handleSend(); }
+      if (e.key === "Enter") { e.preventDefault(); handleSendText(); }
     });
+
+    // Gửi ảnh
+    document.getElementById("img-btn").onclick = function() {
+      document.getElementById("img-input").click();
+    };
+    document.getElementById("img-input").onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      window.compressImage(file, 720, 0.65, async function(dataUrl) {
+        await sendPayload({ type: "image", media: dataUrl });
+      });
+      e.target.value = "";
+    };
+
+    // Ghi âm Voice
+    let mediaRecorder = null;
+    let audioChunks = [];
+    const voiceBtn = document.getElementById("voice-btn");
+
+    voiceBtn.onclick = async function() {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        voiceBtn.classList.remove("recording");
+        return;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/mp4" });
+          if (blob.size > 700000) {
+            alert("Đoạn ghi âm hơi dài (tối đa khoảng 25 giây), hãy thử ghi ngắn hơn nhé!");
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            await sendPayload({ type: "audio", media: reader.result });
+          };
+          reader.readAsDataURL(blob);
+        };
+        mediaRecorder.start();
+        voiceBtn.classList.add("recording");
+      } catch (err) {
+        alert("Không bật được micro (hãy cấp quyền Micro cho Safari): " + err.message);
+      }
+    };
+
+    // Xóa toàn bộ cuộc trò chuyện
+    document.getElementById("clear-btn").onclick = async function() {
+      if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
+      try {
+        const snap = await getDocs(messagesRef);
+        const promises = snap.docs.map(d => deleteDoc(doc(db, "messages", d.id)));
+        await Promise.all(promises);
+      } catch (e) {
+        alert("Lỗi khi xóa: " + e.message);
+      }
+    };
   </script>
 </body>
 </html>
