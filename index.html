@@ -331,10 +331,11 @@
         .map(m => `${m.sender}: ${m.text}`)
         .join("\n");
 
-      const promptText = `Bạn là trợ lý AI vui vẻ tham gia cùng cặp đôi Anh và Em trong phòng chat riêng. Hãy trả lời ngắn gọn, tự nhiên bằng tiếng Việt.\n\nLịch sử chat gần đây:\n${recentContext}\n\n${window.currentRole} hỏi: ${question}`;
+      const nowStr = new Date().toLocaleString("vi-VN", { weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
+      const promptText = `Bạn là trợ lý AI vui vẻ tham gia cùng cặp đôi Anh và Em trong phòng chat riêng. Thời gian hiện tại là: ${nowStr}. Hãy trả lời ngắn gọn, tự nhiên bằng tiếng Việt.\n\nLịch sử chat gần đây:\n${recentContext}\n\n${window.currentRole} hỏi: ${question}`;
 
       try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -395,4 +396,42 @@
         return;
       }
       try {
-        const stream = await navigator
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/mp4" });
+          if (blob.size > 700000) {
+            alert("Đoạn ghi âm hơi dài (tối đa khoảng 25 giây), hãy thử ghi ngắn hơn nhé!");
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = async () => {
+            await sendPayload({ type: "audio", media: reader.result });
+          };
+          reader.readAsDataURL(blob);
+        };
+        mediaRecorder.start();
+        voiceBtn.classList.add("recording");
+      } catch (err) {
+        alert("Không bật được micro: " + err.message);
+      }
+    };
+
+    document.getElementById("clear-btn").onclick = async function() {
+      if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
+      try {
+        const snap = await getDocs(messagesRef);
+        const promises = snap.docs.map(d => deleteDoc(doc(db, "messages", d.id)));
+        await Promise.all(promises);
+      } catch (e) {
+        alert("Lỗi khi xóa: " + e.message);
+      }
+    };
+  </script>
+</body>
+</html>
