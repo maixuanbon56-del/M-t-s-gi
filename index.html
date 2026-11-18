@@ -27,7 +27,7 @@
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      padding: calc(env(safe-area-inset-top) + 8px) 14px 10px;
+      padding: calc(env(safe-area-inset-top) + 8px) 12px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -37,12 +37,14 @@
     .chat-partner {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
+      min-width: 0;
     }
     .avatar-wrap {
       position: relative;
       width: 38px;
       height: 38px;
+      flex-shrink: 0;
     }
     .avatar {
       width: 38px;
@@ -70,32 +72,27 @@
     .partner-info {
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
     .partner-name {
-      font-size: 16px;
+      font-size: 15.5px;
       font-weight: 700;
       color: #050505;
       line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .partner-status {
-      font-size: 12px;
+      font-size: 11.5px;
       color: #65676b;
       margin-top: 1px;
     }
     .header-right {
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-    .role-pill {
-      background: #f0f2f5;
-      border: none;
-      border-radius: 16px;
-      padding: 6px 11px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--theme-main);
-      cursor: pointer;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .header-icon-btn {
       background: #f0f2f5;
@@ -109,7 +106,7 @@
       color: var(--theme-main);
       cursor: pointer;
     }
-    .header-icon-btn:active { transform: scale(0.93); }
+    .header-icon-btn:active { transform: scale(0.92); }
 
     /* Khu vực tin nhắn */
     #chat-box {
@@ -168,11 +165,7 @@
       line-height: 1.38;
       word-wrap: break-word;
       position: relative;
-      transition: transform 0.1s ease;
     }
-    .bubble:active { transform: scale(0.98); }
-
-    /* Màu bong bóng Messenger */
     .msg-group.me .bubble {
       background: var(--theme-grad);
       color: #ffffff;
@@ -208,7 +201,6 @@
       padding: 2px 4px;
       line-height: 1.1;
     }
-
     .msg-meta {
       font-size: 11px;
       color: #65676b;
@@ -220,7 +212,7 @@
     }
     .msg-meta.show-always { display: inline-block; font-weight: 600; }
 
-    /* Bong bóng đang nhập chuẩn Messenger */
+    /* Bong bóng đang nhập */
     #typing-bubble-row {
       display: none;
       align-items: flex-end;
@@ -250,7 +242,7 @@
       30% { transform: translateY(-4px); opacity: 1; }
     }
 
-    /* Footer nhập liệu chuẩn Messenger */
+    /* Footer nhập liệu */
     footer {
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(20px);
@@ -274,14 +266,12 @@
       flex-shrink: 0;
       border-radius: 50%;
     }
-    .action-icon:active { background: #f0f2f5; }
     .action-icon.recording {
       background: #ff3b30;
       color: #fff;
       animation: pulseRec 1s infinite;
     }
     @keyframes pulseRec { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
-
     .input-pill {
       flex: 1;
       background: #f0f2f5;
@@ -316,7 +306,7 @@
       flex-shrink: 0;
     }
 
-    /* Bottom Sheet Cài đặt phòng chat */
+    /* Bottom Sheet Cài đặt */
     #sheet-backdrop {
       position: fixed;
       inset: 0;
@@ -355,9 +345,7 @@
       margin-bottom: 16px;
       color: #050505;
     }
-    .sheet-section {
-      margin-bottom: 16px;
-    }
+    .sheet-section { margin-bottom: 16px; }
     .sheet-label {
       font-size: 12px;
       font-weight: 600;
@@ -398,7 +386,6 @@
       border-radius: 50%;
       border: 3px solid transparent;
       cursor: pointer;
-      transition: transform 0.15s;
     }
     .color-swatch.active {
       border-color: #050505;
@@ -420,6 +407,140 @@
       cursor: pointer;
     }
     .menu-btn.danger { color: #ff3b30; background: #fff0f0; }
+
+    /* Màn hình Gọi Thoại & Video Call + Filter AR */
+    #call-overlay {
+      position: fixed;
+      inset: 0;
+      background: #111318;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+      overflow: hidden;
+    }
+    #remote-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #18191a;
+      z-index: 1;
+    }
+    #local-preview-wrap {
+      position: absolute;
+      top: calc(env(safe-area-inset-top) + 16px);
+      right: 16px;
+      width: 108px;
+      height: 156px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.35);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+      z-index: 5;
+      background: #222;
+    }
+    #local-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    #call-top-info {
+      position: relative;
+      z-index: 4;
+      padding-top: calc(env(safe-area-inset-top) + 46px);
+      text-align: center;
+      pointer-events: none;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.65);
+    }
+    .call-avatar-big {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: var(--theme-grad);
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    #call-peer-name { font-size: 24px; font-weight: 700; }
+    #call-status-label { font-size: 14px; opacity: 0.85; margin-top: 6px; }
+
+    /* Thanh điều khiển Filter & Nút cuộc gọi */
+    #call-bottom-area {
+      position: relative;
+      z-index: 6;
+      padding: 16px 12px calc(env(safe-area-inset-bottom) + 24px);
+      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 6px;
+      scrollbar-width: none;
+    }
+    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      background: rgba(255,255,255,0.18);
+      backdrop-filter: blur(10px);
+      border: 1.5px solid transparent;
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .filter-chip.active {
+      background: rgba(255,255,255,0.92);
+      color: #050505;
+      border-color: #fff;
+    }
+    .filter-chip.off-btn {
+      background: rgba(255, 59, 48, 0.25);
+      border-color: rgba(255, 59, 48, 0.6);
+    }
+    .filter-chip.off-btn.active {
+      background: #ff3b30;
+      color: #fff;
+    }
+
+    .call-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+    }
+    .c-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 21px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .c-btn.muted { background: #fff; color: #050505; }
+    .c-btn.end-call { background: #ff3b30; width: 62px; height: 62px; font-size: 24px; }
+    .c-btn.accept-call { background: #31a24c; width: 62px; height: 62px; font-size: 24px; }
   </style>
 </head>
 <body>
@@ -435,7 +556,12 @@
       </div>
     </div>
     <div class="header-right">
-      <button type="button" class="role-pill" id="quick-role-btn">Tôi là: Anh</button>
+      <button type="button" class="header-icon-btn" id="audio-call-btn" title="Gọi thoại">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </button>
+      <button type="button" class="header-icon-btn" id="video-call-btn" title="Gọi video">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+      </button>
       <button type="button" class="header-icon-btn" id="open-settings-btn" title="Tùy chỉnh">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
       </button>
@@ -466,7 +592,7 @@
     <button type="button" id="send-btn" title="Gửi">❤️</button>
   </footer>
 
-  <!-- Bottom Sheet Tùy chỉnh -->
+  <!-- Bottom Sheet Cài đặt -->
   <div id="sheet-backdrop"></div>
   <div id="settings-sheet">
     <div class="sheet-handle"></div>
@@ -503,6 +629,48 @@
     </div>
   </div>
 
+  <!-- Màn hình Gọi & Filter AR -->
+  <div id="call-overlay">
+    <video id="remote-video" autoplay playsinline></video>
+    <video id="raw-local-video" autoplay playsinline muted style="display:none"></video>
+
+    <div id="local-preview-wrap">
+      <canvas id="local-canvas"></canvas>
+    </div>
+
+    <div id="call-top-info">
+      <div class="call-avatar-big" id="call-avatar-big">E</div>
+      <div id="call-peer-name">Em</div>
+      <div id="call-status-label">Đang kết nối...</div>
+    </div>
+
+    <div id="call-bottom-area">
+      <!-- Thanh chọn Filter & Nút tắt Filter -->
+      <div id="filter-bar">
+        <button type="button" class="filter-chip off-btn" data-filter="none">🚫 Tắt Filter</button>
+        <button type="button" class="filter-chip active" data-filter="phaelo85">✨ Phaelo 85 (Mẫu)</button>
+        <button type="button" class="filter-chip" data-filter="peach">🍑 Hồng Đào</button>
+        <button type="button" class="filter-chip" data-filter="milky">🥛 Trắng Sữa</button>
+        <button type="button" class="filter-chip" data-filter="vintage">🎞️ Film Ấm</button>
+      </div>
+
+      <!-- Nút điều khiển khi đang gọi -->
+      <div class="call-controls" id="active-call-controls">
+        <button type="button" class="c-btn" id="toggle-filter-btn" title="Bật/Tắt nhanh Filter">✨</button>
+        <button type="button" class="c-btn" id="flip-cam-btn" title="Lật camera">🔄</button>
+        <button type="button" class="c-btn" id="toggle-mic-btn" title="Tắt/Bật mic">🎙️</button>
+        <button type="button" class="c-btn" id="toggle-cam-btn" title="Tắt/Bật cam">📷</button>
+        <button type="button" class="c-btn end-call" id="hangup-btn" title="Kết thúc">📵</button>
+      </div>
+
+      <!-- Nút nhận cuộc gọi đến -->
+      <div class="call-controls" id="incoming-call-controls" style="display:none;">
+        <button type="button" class="c-btn end-call" id="reject-call-btn" title="Từ chối">✖️</button>
+        <button type="button" class="c-btn accept-call" id="accept-call-btn" title="Nghe máy">📞</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     var currentRole = localStorage.getItem("chat_role") || "Anh";
     var allMessages = [];
@@ -524,7 +692,6 @@
       { main: "#2f3542", grad: "linear-gradient(135deg, #57606f, #2f3542)" }
     ];
 
-    // Tạo bảng chọn màu
     var colorGrid = document.getElementById("color-grid");
     themes.forEach(function(t, idx) {
       var btn = document.createElement("button");
@@ -544,8 +711,7 @@
       document.documentElement.style.setProperty("--theme-main", t.main);
       document.documentElement.style.setProperty("--theme-grad", t.grad);
 
-      var swatches = document.querySelectorAll(".color-swatch");
-      swatches.forEach(function(s, i) {
+      document.querySelectorAll(".color-swatch").forEach(function(s, i) {
         s.classList.toggle("active", i === (roomSettings.themeIndex || 0));
       });
 
@@ -557,7 +723,6 @@
       document.getElementById("partner-name").textContent = otherName;
       document.getElementById("partner-avatar").textContent = otherName.charAt(0).toUpperCase();
       document.getElementById("typing-avatar").textContent = otherName.charAt(0).toUpperCase();
-      document.getElementById("quick-role-btn").textContent = "Tôi: " + getDisplayName(currentRole);
       document.getElementById("choice-anh").textContent = nameAnh;
       document.getElementById("choice-em").textContent = nameEm;
       document.getElementById("rename-preview").textContent = nameAnh + " & " + nameEm;
@@ -683,7 +848,6 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Điều khiển Bottom Sheet
     var sheet = document.getElementById("settings-sheet");
     var backdrop = document.getElementById("sheet-backdrop");
     function openSheet() {
@@ -696,7 +860,6 @@
       setTimeout(function() { backdrop.style.display = "none"; }, 260);
     }
     document.getElementById("open-settings-btn").onclick = openSheet;
-    document.getElementById("quick-role-btn").onclick = openSheet;
     backdrop.onclick = closeSheet;
 
     function compressImage(file, maxW, quality, callback) {
@@ -723,7 +886,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC3F8UwljVUkAjV9FdnchYRjQgLdiYt_eA",
@@ -739,6 +902,7 @@
     const db = getFirestore(app);
     const messagesRef = collection(db, "messages");
     const roomDocRef = doc(db, "settings", "room");
+    const callDocRef = doc(db, "calls", "active");
 
     onSnapshot(roomDocRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -930,6 +1094,460 @@
       } catch (e) {
         alert("Lỗi khi xóa: " + e.message);
       }
+    };
+
+    // ==========================================
+    // HỆ THỐNG GỌI VIDEO / THOẠI WEBRTC + FILTER AR
+    // ==========================================
+    const rtcConfig = {
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" }
+      ]
+    };
+
+    let pc = null;
+    let rawStream = null;
+    let processedStream = null;
+    let isVideoCall = true;
+    let facingMode = "user";
+    let activeFilter = "phaelo85";
+    let lastActiveFilter = "phaelo85";
+    let renderLoopId = null;
+    let faceLandmarker = null;
+    let isMicMuted = false;
+    let isCamOff = false;
+    let callTimer = null;
+    let callSeconds = 0;
+
+    const callOverlay = document.getElementById("call-overlay");
+    const rawVideo = document.getElementById("raw-local-video");
+    const localCanvas = document.getElementById("local-canvas");
+    const canvasCtx = localCanvas.getContext("2d");
+    const remoteVideo = document.getElementById("remote-video");
+
+    // Tải bộ nhận diện khuôn mặt MediaPipe FaceLandmarker (chạy ngầm nhẹ)
+    async function initFaceMesh() {
+      if (faceLandmarker) return;
+      try {
+        const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+        const fileset = await vision.FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+        faceLandmarker = await vision.FaceLandmarker.createFromOptions(fileset, {
+          baseOptions: {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU"
+          },
+          runningMode: "VIDEO",
+          numFaces: 1
+        });
+      } catch (e) {
+        console.warn("FaceMesh fallback:", e);
+      }
+    }
+
+    // Các điểm mốc môi & gò má chuẩn MediaPipe
+    const LIPS_OUTER = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146];
+    const LIPS_INNER = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95];
+
+    function drawMakeup(landmarks, w, h, preset) {
+      if (!landmarks || preset === "none") return;
+
+      let lipColor = "rgba(218, 88, 108, 0.36)";
+      let blushColor = "rgba(255, 118, 136, 0.28)";
+      let noseBlush = "rgba(255, 125, 140, 0.22)";
+
+      if (preset === "peach") {
+        lipColor = "rgba(235, 105, 85, 0.38)";
+        blushColor = "rgba(255, 135, 100, 0.32)";
+      } else if (preset === "milky") {
+        lipColor = "rgba(225, 95, 125, 0.32)";
+        blushColor = "rgba(255, 145, 165, 0.25)";
+      } else if (preset === "vintage") {
+        lipColor = "rgba(185, 65, 75, 0.42)";
+        blushColor = "rgba(215, 105, 95, 0.26)";
+      }
+
+      // 1. Tô son môi (khoét rỗng lòng môi khi mở miệng)
+      canvasCtx.save();
+      canvasCtx.beginPath();
+      LIPS_OUTER.forEach((idx, i) => {
+        const pt = landmarks[idx];
+        if (i === 0) canvasCtx.moveTo(pt.x * w, pt.y * h);
+        else canvasCtx.lineTo(pt.x * w, pt.y * h);
+      });
+      canvasCtx.closePath();
+
+      LIPS_INNER.slice().reverse().forEach((idx, i) => {
+        const pt = landmarks[idx];
+        if (i === 0) canvasCtx.moveTo(pt.x * w, pt.y * h);
+        else canvasCtx.lineTo(pt.x * w, pt.y * h);
+      });
+      canvasCtx.closePath();
+
+      canvasCtx.fillStyle = lipColor;
+      canvasCtx.filter = "blur(2.5px)";
+      canvasCtx.fill("evenodd");
+      canvasCtx.restore();
+
+      // 2. Phấn má hồng 2 bên gò má + đầu mũi (chuẩn style Phaelo 85)
+      const leftCheek = landmarks[116];
+      const rightCheek = landmarks[345];
+      const noseTip = landmarks[4];
+      const faceWidth = Math.hypot((landmarks[454].x - landmarks[234].x) * w, (landmarks[454].y - landmarks[234].y) * h);
+      const cheekRadius = Math.max(18, faceWidth * 0.16);
+
+      [leftCheek, rightCheek].forEach(pt => {
+        const cx = pt.x * w;
+        const cy = pt.y * h;
+        const grad = canvasCtx.createRadialGradient(cx, cy, 2, cx, cy, cheekRadius);
+        grad.addColorStop(0, blushColor);
+        grad.addColorStop(1, "rgba(255, 120, 140, 0)");
+        canvasCtx.fillStyle = grad;
+        canvasCtx.beginPath();
+        canvasCtx.arc(cx, cy, cheekRadius, 0, Math.PI * 2);
+        canvasCtx.fill();
+      });
+
+      // Chút hồng nhẹ ở chóp mũi
+      const nx = noseTip.x * w;
+      const ny = noseTip.y * h;
+      const nGrad = canvasCtx.createRadialGradient(nx, ny, 1, nx, ny, cheekRadius * 0.55);
+      nGrad.addColorStop(0, noseBlush);
+      nGrad.addColorStop(1, "rgba(255, 120, 140, 0)");
+      canvasCtx.fillStyle = nGrad;
+      canvasCtx.beginPath();
+      canvasCtx.arc(nx, ny, cheekRadius * 0.55, 0, Math.PI * 2);
+      canvasCtx.fill();
+    }
+
+    function startVideoFilterLoop() {
+      if (renderLoopId) cancelAnimationFrame(renderLoopId);
+      let lastVideoTime = -1;
+      let cachedLandmarks = null;
+
+      function renderFrame() {
+        if (!rawVideo || rawVideo.readyState < 2) {
+          renderLoopId = requestAnimationFrame(renderFrame);
+          return;
+        }
+        const w = rawVideo.videoWidth || 480;
+        const h = rawVideo.videoHeight || 640;
+        if (localCanvas.width !== w || localCanvas.height !== h) {
+          localCanvas.width = w;
+          localCanvas.height = h;
+        }
+
+        canvasCtx.save();
+        if (facingMode === "user") {
+          canvasCtx.translate(w, 0);
+          canvasCtx.scale(-1, 1);
+        }
+
+        // Áp dụng bộ lọc màu nền theo preset
+        if (activeFilter === "phaelo85") {
+          canvasCtx.filter = "brightness(1.08) contrast(0.95) saturate(1.08) sepia(0.08)";
+        } else if (activeFilter === "peach") {
+          canvasCtx.filter = "brightness(1.07) contrast(0.97) saturate(1.16)";
+        } else if (activeFilter === "milky") {
+          canvasCtx.filter = "brightness(1.13) contrast(0.92) saturate(0.94)";
+        } else if (activeFilter === "vintage") {
+          canvasCtx.filter = "brightness(1.03) contrast(1.05) sepia(0.24) saturate(1.1)";
+        } else {
+          canvasCtx.filter = "none";
+        }
+
+        canvasCtx.drawImage(rawVideo, 0, 0, w, h);
+        canvasCtx.filter = "none";
+
+        // Hiệu ứng sương mờ tỏa sáng nhẹ (Soft Dreamy Glow giống Phaelo 85)
+        if (activeFilter === "phaelo85" || activeFilter === "milky") {
+          canvasCtx.save();
+          canvasCtx.globalAlpha = 0.24;
+          canvasCtx.globalCompositeOperation = "screen";
+          canvasCtx.filter = "blur(10px)";
+          canvasCtx.drawImage(rawVideo, 0, 0, w, h);
+          canvasCtx.restore();
+        }
+
+        // Nhận diện khuôn mặt và vẽ son phấn
+        if (activeFilter !== "none" && faceLandmarker) {
+          if (rawVideo.currentTime !== lastVideoTime) {
+            lastVideoTime = rawVideo.currentTime;
+            const res = faceLandmarker.detectForVideo(rawVideo, performance.now());
+            cachedLandmarks = res.faceLandmarks?.[0] || null;
+          }
+          if (cachedLandmarks) {
+            drawMakeup(cachedLandmarks, w, h, activeFilter);
+          }
+        }
+
+        canvasCtx.restore();
+        renderLoopId = requestAnimationFrame(renderFrame);
+      }
+      renderFrame();
+    }
+
+    // Chọn Filter & Tắt Filter
+    function updateFilterUI() {
+      document.querySelectorAll(".filter-chip").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filter === activeFilter);
+      });
+      const toggleBtn = document.getElementById("toggle-filter-btn");
+      toggleBtn.style.background = activeFilter === "none" ? "rgba(255,255,255,0.2)" : "#fff";
+      toggleBtn.style.color = activeFilter === "none" ? "#fff" : "#050505";
+    }
+
+    document.querySelectorAll(".filter-chip").forEach(btn => {
+      btn.onclick = () => {
+        activeFilter = btn.dataset.filter;
+        if (activeFilter !== "none") lastActiveFilter = activeFilter;
+        updateFilterUI();
+      };
+    });
+
+    document.getElementById("toggle-filter-btn").onclick = () => {
+      if (activeFilter === "none") {
+        activeFilter = lastActiveFilter || "phaelo85";
+      } else {
+        lastActiveFilter = activeFilter;
+        activeFilter = "none";
+      }
+      updateFilterUI();
+    };
+
+    async function setupLocalMedia(videoEnabled) {
+      if (rawStream) rawStream.getTracks().forEach(t => t.stop());
+      rawStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: videoEnabled ? { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } } : false
+      });
+
+      if (videoEnabled) {
+        rawVideo.srcObject = rawStream;
+        await rawVideo.play();
+        initFaceMesh();
+        startVideoFilterLoop();
+        const canvasStream = localCanvas.captureStream(24);
+        const audioTrack = rawStream.getAudioTracks()[0];
+        if (audioTrack) canvasStream.addTrack(audioTrack);
+        processedStream = canvasStream;
+        document.getElementById("local-preview-wrap").style.display = "block";
+        document.getElementById("filter-bar").style.display = "flex";
+        document.getElementById("toggle-filter-btn").style.display = "flex";
+        document.getElementById("flip-cam-btn").style.display = "flex";
+      } else {
+        processedStream = rawStream;
+        document.getElementById("local-preview-wrap").style.display = "none";
+        document.getElementById("filter-bar").style.display = "none";
+        document.getElementById("toggle-filter-btn").style.display = "none";
+        document.getElementById("flip-cam-btn").style.display = "none";
+      }
+    }
+
+    function openCallScreen(peerName, statusText, incoming) {
+      callOverlay.style.display = "flex";
+      document.getElementById("call-peer-name").textContent = peerName;
+      document.getElementById("call-avatar-big").textContent = peerName.charAt(0).toUpperCase();
+      document.getElementById("call-status-label").textContent = statusText;
+      document.getElementById("active-call-controls").style.display = incoming ? "none" : "flex";
+      document.getElementById("incoming-call-controls").style.display = incoming ? "flex" : "none";
+      updateFilterUI();
+    }
+
+    function startCallTimer() {
+      clearInterval(callTimer);
+      callSeconds = 0;
+      callTimer = setInterval(() => {
+        callSeconds++;
+        const m = String(Math.floor(callSeconds / 60)).padStart(2, "0");
+        const s = String(callSeconds % 60).padStart(2, "0");
+        document.getElementById("call-status-label").textContent = `${m}:${s}`;
+        if (isVideoCall) {
+          document.getElementById("call-top-info").style.opacity = "0.65";
+        }
+      }, 1000);
+    }
+
+    async function cleanupCall(clearFirestore = true) {
+      clearInterval(callTimer);
+      if (renderLoopId) cancelAnimationFrame(renderLoopId);
+      if (rawStream) rawStream.getTracks().forEach(t => t.stop());
+      if (pc) { pc.close(); pc = null; }
+      rawStream = null;
+      processedStream = null;
+      remoteVideo.srcObject = null;
+      callOverlay.style.display = "none";
+      document.getElementById("call-top-info").style.opacity = "1";
+      isMicMuted = false;
+      isCamOff = false;
+      document.getElementById("toggle-mic-btn").classList.remove("muted");
+      document.getElementById("toggle-cam-btn").classList.remove("muted");
+
+      if (clearFirestore) {
+        try {
+          const offerCands = await getDocs(collection(db, "calls", "active", "offerCandidates"));
+          await Promise.all(offerCands.docs.map(d => deleteDoc(d.ref)));
+          const answerCands = await getDocs(collection(db, "calls", "active", "answerCandidates"));
+          await Promise.all(answerCands.docs.map(d => deleteDoc(d.ref)));
+          await deleteDoc(callDocRef);
+        } catch (e) {}
+      }
+    }
+
+    function createPeerConnection(isCaller) {
+      pc = new RTCPeerConnection(rtcConfig);
+      processedStream.getTracks().forEach(track => pc.addTrack(track, processedStream));
+
+      const remoteStream = new MediaStream();
+      remoteVideo.srcObject = remoteStream;
+      pc.ontrack = (event) => {
+        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+        startCallTimer();
+      };
+
+      const candCol = collection(db, "calls", "active", isCaller ? "offerCandidates" : "answerCandidates");
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          addDoc(candCol, event.candidate.toJSON());
+        }
+      };
+
+      pc.onconnectionstatechange = () => {
+        if (pc && (pc.connectionState === "disconnected" || pc.connectionState === "failed" || pc.connectionState === "closed")) {
+          cleanupCall(false);
+        }
+      };
+    }
+
+    // Bắt đầu gọi đi
+    async function initiateCall(videoMode) {
+      isVideoCall = videoMode;
+      const otherRole = window.currentRole === "Anh" ? "Em" : "Anh";
+      const peerName = window.getDisplayName(otherRole);
+
+      try {
+        await setupLocalMedia(videoMode);
+        openCallScreen(peerName, "Đang đổ chuông...", false);
+        createPeerConnection(true);
+
+        const offerDesc = await pc.createOffer();
+        await pc.setLocalDescription(offerDesc);
+
+        await setDoc(callDocRef, {
+          caller: window.currentRole,
+          callee: otherRole,
+          video: videoMode,
+          status: "ringing",
+          offer: { type: offerDesc.type, sdp: offerDesc.sdp },
+          timestamp: Date.now()
+        });
+
+        onSnapshot(collection(db, "calls", "active", "answerCandidates"), (snap) => {
+          snap.docChanges().forEach((change) => {
+            if (change.type === "added" && pc && pc.remoteDescription) {
+              pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+            }
+          });
+        });
+      } catch (err) {
+        alert("Không thể mở camera/micro: " + err.message);
+        cleanupCall(true);
+      }
+    }
+
+    document.getElementById("audio-call-btn").onclick = () => initiateCall(false);
+    document.getElementById("video-call-btn").onclick = () => initiateCall(true);
+
+    // Lắng nghe cuộc gọi đến & phản hồi
+    onSnapshot(callDocRef, async (snap) => {
+      if (!snap.exists()) {
+        if (callOverlay.style.display === "flex") cleanupCall(false);
+        return;
+      }
+      const data = snap.data();
+
+      // Bỏ qua cuộc gọi cũ quá 60 giây
+      if (Date.now() - data.timestamp > 60000 && data.status === "ringing") {
+        cleanupCall(true);
+        return;
+      }
+
+      // Máy người gọi nhận câu trả lời từ máy người nghe
+      if (data.caller === window.currentRole && data.answer && pc && !pc.currentRemoteDescription) {
+        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      }
+
+      // Máy người nhận thấy cuộc gọi đến
+      if (data.callee === window.currentRole && data.status === "ringing" && callOverlay.style.display !== "flex") {
+        isVideoCall = data.video;
+        const callerName = window.getDisplayName(data.caller);
+        openCallScreen(callerName, data.video ? "Cuộc gọi video đến..." : "Cuộc gọi thoại đến...", true);
+      }
+    });
+
+    // Bấm Nghe máy
+    document.getElementById("accept-call-btn").onclick = async () => {
+      try {
+        const snap = await getDoc(callDocRef);
+        if (!snap.exists()) return;
+        const data = snap.data();
+
+        await setupLocalMedia(data.video);
+        document.getElementById("incoming-call-controls").style.display = "none";
+        document.getElementById("active-call-controls").style.display = "flex";
+        document.getElementById("call-status-label").textContent = "Đang kết nối...";
+
+        createPeerConnection(false);
+        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+        const answerDesc = await pc.createAnswer();
+        await pc.setLocalDescription(answerDesc);
+
+        await updateDoc(callDocRef, {
+          status: "connected",
+          answer: { type: answerDesc.type, sdp: answerDesc.sdp }
+        });
+
+        onSnapshot(collection(db, "calls", "active", "offerCandidates"), (cSnap) => {
+          cSnap.docChanges().forEach((change) => {
+            if (change.type === "added" && pc) {
+              pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+            }
+          });
+        });
+      } catch (err) {
+        alert("Lỗi nhận cuộc gọi: " + err.message);
+        cleanupCall(true);
+      }
+    };
+
+    document.getElementById("reject-call-btn").onclick = () => cleanupCall(true);
+    document.getElementById("hangup-btn").onclick = () => cleanupCall(true);
+
+    // Lật camera trước / sau
+    document.getElementById("flip-cam-btn").onclick = async () => {
+      if (!isVideoCall || !pc) return;
+      facingMode = facingMode === "user" ? "environment" : "user";
+      await setupLocalMedia(true);
+      const videoTrack = processedStream.getVideoTracks()[0];
+      const sender = pc.getSenders().find(s => s.track && s.track.kind === "video");
+      if (sender && videoTrack) sender.replaceTrack(videoTrack);
+    };
+
+    // Tắt / Bật Micro
+    document.getElementById("toggle-mic-btn").onclick = function() {
+      isMicMuted = !isMicMuted;
+      if (rawStream) rawStream.getAudioTracks().forEach(t => t.enabled = !isMicMuted);
+      this.classList.toggle("muted", isMicMuted);
+    };
+
+    // Tắt / Bật Camera
+    document.getElementById("toggle-cam-btn").onclick = function() {
+      isCamOff = !isCamOff;
+      if (rawStream) rawStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+      this.classList.toggle("muted", isCamOff);
     };
   </script>
 </body>
