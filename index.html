@@ -21,23 +21,23 @@
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      padding: calc(env(safe-area-inset-top) + 10px) 12px 10px;
+      padding: calc(env(safe-area-inset-top) + 10px) 10px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(0,0,0,0.1);
       z-index: 10;
-      gap: 6px;
+      gap: 4px;
     }
-    header h1 { font-size: 16px; font-weight: 700; color: #000; white-space: nowrap; }
-    .header-actions { display: flex; align-items: center; gap: 6px; }
+    header h1 { font-size: 15px; font-weight: 700; color: #000; white-space: nowrap; }
+    .header-actions { display: flex; align-items: center; gap: 4px; }
     .icon-btn {
       background: rgba(0,0,0,0.06);
       border: none;
       border-radius: 8px;
-      width: 32px;
-      height: 32px;
-      font-size: 15px;
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -45,7 +45,7 @@
     }
     .icon-btn:active { background: rgba(0,0,0,0.15); }
     .role-switch { display: flex; background: #e5e5ea; border-radius: 8px; padding: 2px; }
-    .role-btn { border: none; background: transparent; padding: 5px 12px; font-size: 13px; font-weight: 600; border-radius: 6px; color: #666; cursor: pointer; }
+    .role-btn { border: none; background: transparent; padding: 5px 10px; font-size: 12px; font-weight: 600; border-radius: 6px; color: #666; cursor: pointer; }
     .role-btn.active { background: #fff; color: #007aff; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
 
     #chat-box {
@@ -68,6 +68,14 @@
     }
     .msg.me { align-self: flex-end; background: #007aff; color: #fff; border-bottom-right-radius: 4px; }
     .msg.other { align-self: flex-start; background: rgba(255,255,255,0.92); color: #000; border-bottom-left-radius: 4px; }
+    .msg.ai {
+      align-self: flex-start;
+      background: linear-gradient(135deg, #eef4ff, #f5ebff);
+      color: #1c1c1e;
+      border: 1px solid #d0bfff;
+      border-bottom-left-radius: 4px;
+    }
+    .ai-badge { font-size: 11px; font-weight: 700; color: #6741d9; margin-bottom: 3px; }
     .msg img { max-width: 100%; border-radius: 12px; display: block; margin-bottom: 2px; }
     .msg audio { max-width: 215px; height: 36px; display: block; margin-bottom: 2px; }
     .msg-time { font-size: 10px; opacity: 0.65; margin-top: 3px; text-align: right; }
@@ -76,9 +84,9 @@
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      padding: 8px 10px calc(env(safe-area-inset-bottom) + 10px);
+      padding: 8px 8px calc(env(safe-area-inset-bottom) + 10px);
       display: flex;
-      gap: 6px;
+      gap: 5px;
       align-items: center;
       border-top: 1px solid rgba(0,0,0,0.1);
     }
@@ -86,9 +94,9 @@
       background: #f0f0f5;
       border: none;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 17px;
+      width: 34px;
+      height: 34px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -106,7 +114,7 @@
       min-width: 0;
       border: 1px solid #d1d1d6;
       border-radius: 20px;
-      padding: 9px 14px;
+      padding: 8px 12px;
       font-size: 16px;
       outline: none;
       background: #fff;
@@ -116,9 +124,9 @@
       color: #fff;
       border: none;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 15px;
+      width: 34px;
+      height: 34px;
+      font-size: 14px;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -132,6 +140,7 @@
   <header>
     <h1>Mét sê gi ❤️</h1>
     <div class="header-actions">
+      <button type="button" class="icon-btn" id="key-btn" title="Nhập Gemini API Key">🔑</button>
       <button type="button" class="icon-btn" id="bg-btn" title="Đổi ảnh nền">🖼️</button>
       <button type="button" class="icon-btn" id="clear-btn" title="Xóa đoạn chat">🗑️</button>
       <div class="role-switch">
@@ -149,7 +158,8 @@
   <footer>
     <button type="button" class="tool-btn" id="img-btn" title="Gửi ảnh">📷</button>
     <button type="button" class="tool-btn" id="voice-btn" title="Ghi âm">🎙️</button>
-    <input type="text" id="msg-input" placeholder="Nhắn tin..." autocomplete="off" />
+    <button type="button" class="tool-btn" id="ai-btn" title="Hỏi Gemini">✨</button>
+    <input type="text" id="msg-input" placeholder="Nhắn tin hoặc @ai..." autocomplete="off" />
     <button type="button" id="send-btn">➤</button>
   </footer>
 
@@ -178,9 +188,10 @@
       chatBox.innerHTML = "";
       for (var i = 0; i < allMessages.length; i++) {
         var msg = allMessages[i];
+        var isAI = msg.sender === "Gemini";
         var isMe = msg.sender === currentRole;
         var div = document.createElement("div");
-        div.className = "msg " + (isMe ? "me" : "other");
+        div.className = "msg " + (isAI ? "ai" : (isMe ? "me" : "other"));
 
         var timeStr = "";
         if (msg.timestamp && msg.timestamp.toDate) {
@@ -188,13 +199,13 @@
           timeStr = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
         }
 
-        var contentHTML = "";
+        var contentHTML = isAI ? "<div class='ai-badge'>✨ Gemini</div>" : "";
         if (msg.type === "image" && msg.media) {
-          contentHTML = "<img src='" + msg.media + "' alt='ảnh' />";
+          contentHTML += "<img src='" + msg.media + "' alt='ảnh' />";
         } else if (msg.type === "audio" && msg.media) {
-          contentHTML = "<audio controls playsinline src='" + msg.media + "'></audio>";
+          contentHTML += "<audio controls playsinline src='" + msg.media + "'></audio>";
         } else {
-          contentHTML = "<div>" + escapeHTML(msg.text || "") + "</div>";
+          contentHTML += "<div>" + escapeHTML(msg.text || "").replace(/\n/g, "<br>") + "</div>";
         }
 
         div.innerHTML = contentHTML + "<div class='msg-time'>" + timeStr + "</div>";
@@ -215,6 +226,23 @@
       localStorage.setItem("chat_role", "Em");
       updateRoleUI();
       renderMessages();
+    };
+
+    document.getElementById("key-btn").onclick = function() {
+      var currentKey = localStorage.getItem("gemini_api_key") || "";
+      var newKey = prompt("Dán mã Gemini API Key (AIzaSy...) vào đây:", currentKey);
+      if (newKey !== null) {
+        localStorage.setItem("gemini_api_key", newKey.trim());
+        alert(newKey.trim() ? "Đã lưu API Key Gemini!" : "Đã xóa API Key.");
+      }
+    };
+
+    document.getElementById("ai-btn").onclick = function() {
+      var input = document.getElementById("msg-input");
+      if (!input.value.startsWith("@ai ")) {
+        input.value = "@ai " + input.value;
+      }
+      input.focus();
     };
 
     function compressImage(file, maxW, quality, callback) {
@@ -281,7 +309,7 @@
     async function sendPayload(payload) {
       try {
         await addDoc(messagesRef, {
-          sender: window.currentRole,
+          sender: payload.sender || window.currentRole,
           timestamp: serverTimestamp(),
           ...payload
         });
@@ -290,12 +318,53 @@
       }
     }
 
+    async function askGemini(question) {
+      const apiKey = localStorage.getItem("gemini_api_key");
+      if (!apiKey) {
+        alert("Bạn chưa nhập Gemini API Key! Bấm biểu tượng 🔑 trên góc trên để dán Key nhé.");
+        return;
+      }
+
+      const recentContext = window.allMessages
+        .slice(-8)
+        .filter(m => m.type === "text" && m.text)
+        .map(m => `${m.sender}: ${m.text}`)
+        .join("\n");
+
+      const promptText = `Bạn là trợ lý AI vui vẻ tham gia cùng cặp đôi Anh và Em trong phòng chat riêng. Hãy trả lời ngắn gọn, tự nhiên bằng tiếng Việt.\n\nLịch sử chat gần đây:\n${recentContext}\n\n${window.currentRole} hỏi: ${question}`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }]
+          })
+        });
+        const data = await res.json();
+        if (data.error) {
+          alert("Lỗi Gemini: " + data.error.message);
+          return;
+        }
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Gemini không có phản hồi.";
+        await sendPayload({ sender: "Gemini", type: "text", text: reply.trim() });
+      } catch (err) {
+        alert("Không kết nối được Gemini: " + err.message);
+      }
+    }
+
     async function handleSendText() {
       const input = document.getElementById("msg-input");
       const text = input.value.trim();
       if (!text) return;
       input.value = "";
+
       await sendPayload({ type: "text", text: text });
+
+      if (text.toLowerCase().startsWith("@ai")) {
+        const question = text.replace(/^@ai\s*/i, "").trim() || "Chào bạn!";
+        await askGemini(question);
+      }
     }
 
     document.getElementById("send-btn").onclick = handleSendText;
@@ -303,7 +372,6 @@
       if (e.key === "Enter") { e.preventDefault(); handleSendText(); }
     });
 
-    // Gửi ảnh
     document.getElementById("img-btn").onclick = function() {
       document.getElementById("img-input").click();
     };
@@ -316,7 +384,6 @@
       e.target.value = "";
     };
 
-    // Ghi âm Voice
     let mediaRecorder = null;
     let audioChunks = [];
     const voiceBtn = document.getElementById("voice-btn");
@@ -350,11 +417,10 @@
         mediaRecorder.start();
         voiceBtn.classList.add("recording");
       } catch (err) {
-        alert("Không bật được micro (hãy cấp quyền Micro cho Safari): " + err.message);
+        alert("Không bật được micro: " + err.message);
       }
     };
 
-    // Xóa toàn bộ cuộc trò chuyện
     document.getElementById("clear-btn").onclick = async function() {
       if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
       try {
