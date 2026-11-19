@@ -317,16 +317,16 @@
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px);
+      padding: 8px 8px calc(env(safe-area-inset-bottom) + 8px);
       display: flex;
       align-items: flex-end;
-      gap: 8px;
+      gap: 6px;
       border-top: 0.5px solid rgba(0, 0, 0, 0.08);
     }
     .action-icon {
       background: transparent;
       border: none;
-      width: 34px;
+      width: 32px;
       height: 36px;
       display: flex;
       align-items: center;
@@ -365,7 +365,7 @@
     #send-btn {
       background: transparent;
       border: none;
-      width: 36px;
+      width: 34px;
       height: 36px;
       display: flex;
       align-items: center;
@@ -480,7 +480,103 @@
     }
     .menu-btn.danger { color: #ff3b30; background: #fff0f0; }
 
-    /* Màn hình Gọi Thoại & Video Call + Filter AR */
+    /* Màn hình Chụp Ảnh + Filter trực tiếp */
+    #cam-modal {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 120;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    #cam-canvas, #cam-preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+    }
+    #cam-preview-img { display: none; z-index: 2; }
+    .cam-top-bar {
+      position: relative;
+      z-index: 5;
+      padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
+    }
+    .cam-round-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .cam-bottom-bar {
+      position: relative;
+      z-index: 5;
+      padding: 16px 12px calc(env(safe-area-inset-bottom) + 26px);
+      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .cam-shutter-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 28px;
+    }
+    #cam-shutter-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    #cam-shutter-btn::after {
+      content: "";
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.1s;
+    }
+    #cam-shutter-btn:active::after { transform: scale(0.88); }
+
+    .cam-confirm-row {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 18px;
+    }
+    .cam-action-pill {
+      border: none;
+      border-radius: 24px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cam-action-pill.retake { background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(8px); }
+    .cam-action-pill.send { background: var(--theme-grad); color: #fff; box-shadow: 0 4px 14px rgba(0,132,255,0.4); }
+
+    /* Màn hình Gọi Thoại & Video Call + Filter */
     #call-overlay {
       position: fixed;
       inset: 0;
@@ -553,7 +649,7 @@
       flex-direction: column;
       gap: 16px;
     }
-    #filter-bar {
+    .filter-scroll-bar {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -561,7 +657,7 @@
       padding: 4px 6px;
       scrollbar-width: none;
     }
-    #filter-bar::-webkit-scrollbar { display: none; }
+    .filter-scroll-bar::-webkit-scrollbar { display: none; }
     .filter-chip {
       background: rgba(255,255,255,0.18);
       backdrop-filter: blur(10px);
@@ -660,7 +756,10 @@
   </div>
 
   <footer>
-    <button type="button" class="action-icon" id="img-btn" title="Gửi ảnh">
+    <button type="button" class="action-icon" id="open-cam-btn" title="Chụp ảnh có Filter">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+    </button>
+    <button type="button" class="action-icon" id="img-btn" title="Chọn ảnh từ thư viện">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
     </button>
     <button type="button" class="action-icon" id="voice-btn" title="Ghi âm">
@@ -717,7 +816,35 @@
     </div>
   </div>
 
-  <!-- Màn hình Gọi & Filter AR -->
+  <!-- Màn hình Camera Chụp Ảnh + Filter -->
+  <div id="cam-modal">
+    <video id="cam-raw-video" autoplay playsinline muted style="display:none"></video>
+    <canvas id="cam-canvas"></canvas>
+    <img id="cam-preview-img" alt="Xem trước ảnh" />
+
+    <div class="cam-top-bar">
+      <button type="button" class="cam-round-btn" id="cam-close-btn" title="Đóng">✖️</button>
+      <button type="button" class="cam-round-btn" id="cam-flip-btn" title="Đổi camera">🔄</button>
+    </div>
+
+    <div class="cam-bottom-bar">
+     <div class="filter-scroll-bar" id="cam-filter-bar">
+        <button type="button" class="filter-chip off-btn" data-camfilter="none">🚫 Tắt Filter</button>
+        <button type="button" class="filter-chip active" data-camfilter="sigma">🗿 Sigma Face</button>
+      </div>
+
+      <div class="cam-shutter-row" id="cam-shutter-row">
+        <button type="button" id="cam-shutter-btn" title="Chụp ảnh"></button>
+      </div>
+
+      <div class="cam-confirm-row" id="cam-confirm-row">
+        <button type="button" class="cam-action-pill retake" id="cam-retake-btn">Chụp lại</button>
+        <button type="button" class="cam-action-pill send" id="cam-send-btn">Gửi ảnh ➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Màn hình Gọi & Filter -->
   <div id="call-overlay">
     <video id="remote-video" autoplay playsinline></video>
     <video id="raw-local-video" autoplay playsinline muted style="display:none"></video>
@@ -733,12 +860,13 @@
     </div>
 
     <div id="call-bottom-area">
-      <div id="filter-bar">
+      <div class="filter-scroll-bar" id="filter-bar">
         <button type="button" class="filter-chip off-btn" data-filter="none">🚫 Tắt Filter</button>
         <button type="button" class="filter-chip active" data-filter="phaelo85">✨ Phaelo 85</button>
         <button type="button" class="filter-chip" data-filter="peach">🍑 Hồng Đào</button>
         <button type="button" class="filter-chip" data-filter="milky">🥛 Trắng Sữa</button>
         <button type="button" class="filter-chip" data-filter="vintage">🎞️ Film Ấm</button>
+        <button type="button" class="filter-chip" data-filter="bw">🖤 Đen Trắng</button>
       </div>
 
       <div class="call-controls" id="active-call-controls">
@@ -776,8 +904,43 @@
       lastTkbNotifyDate: ""
     };
 
+    // Hàm áp dụng bộ lọc màu dùng chung cho cả Camera chụp ảnh và Gọi Video
+    function drawFilteredFrame(ctx, videoEl, w, h, filterName, mirror) {
+      ctx.save();
+      if (mirror) {
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
+      }
+
+      if (filterName === "phaelo85") {
+        ctx.filter = "brightness(1.08) contrast(0.95) saturate(1.08) sepia(0.08)";
+      } else if (filterName === "peach") {
+        ctx.filter = "brightness(1.07) contrast(0.97) saturate(1.18)";
+      } else if (filterName === "milky") {
+        ctx.filter = "brightness(1.13) contrast(0.92) saturate(0.94)";
+      } else if (filterName === "vintage") {
+        ctx.filter = "brightness(1.03) contrast(1.05) sepia(0.24) saturate(1.1)";
+      } else if (filterName === "bw") {
+        ctx.filter = "grayscale(1) contrast(1.12) brightness(1.05)";
+      } else {
+        ctx.filter = "none";
+      }
+
+      ctx.drawImage(videoEl, 0, 0, w, h);
+      ctx.filter = "none";
+
+      if (filterName === "phaelo85" || filterName === "milky") {
+        ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.globalCompositeOperation = "screen";
+        ctx.filter = "blur(10px)";
+        ctx.drawImage(videoEl, 0, 0, w, h);
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
     // Dữ liệu Thời Khóa Biểu
-    // 0: Chủ Nhật, 1: Thứ 2, 2: Thứ 3, 3: Thứ 4, 4: Thứ 5, 5: Thứ 6, 6: Thứ 7
     var TKB_DATA = {
       anh: {
         name: "Mai Xuân Anh",
@@ -950,7 +1113,6 @@
       }
     }
 
-    // Âm thanh Ting & Banner thông báo khi nhận tin nhắn
     function playNotificationSound() {
       try {
         var AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -980,7 +1142,6 @@
       playNotificationSound();
       if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
 
-      // Banner nổi trong app
       var toast = document.getElementById("inapp-toast");
       document.getElementById("toast-av").textContent = senderName.charAt(0).toUpperCase();
       document.getElementById("toast-title").textContent = senderName;
@@ -989,7 +1150,6 @@
       clearTimeout(toastTimeout);
       toastTimeout = setTimeout(function() { toast.classList.remove("show"); }, 4000);
 
-      // Đổi tiêu đề tab & gửi thông báo hệ thống nếu đang ẩn tab
       if (document.hidden) {
         document.title = "(1) " + senderName + ": " + previewText.slice(0, 25);
         if ("Notification" in window && Notification.permission === "granted") {
@@ -1027,7 +1187,6 @@
       for (var i = 0; i < allMessages.length; i++) {
         var msg = allMessages[i];
 
-        // Thẻ nhắc lịch hệ thống
         if (msg.sender === "SYSTEM" || msg.type === "schedule") {
           var card = document.createElement("div");
           card.className = "schedule-card";
@@ -1173,7 +1332,6 @@
       } catch (e) {}
     }
 
-    // Cập nhật trạng thái Đang hoạt động / Offline theo thời gian thực
     function updateMyPresence(isOnline) {
       const seenField = window.currentRole === "Anh" ? "lastSeenAnh" : "lastSeenEm";
       const onlineField = window.currentRole === "Anh" ? "onlineAnh" : "onlineEm";
@@ -1198,7 +1356,6 @@
     });
     window.addEventListener("beforeunload", () => updateMyPresence(false));
 
-    // Tự động gửi thông báo lịch học lúc 23:00 mỗi tối (chống gửi trùng bằng Transaction)
     async function checkAndSendDailySchedule(forceNow = false) {
       const now = new Date();
       if (!forceNow && now.getHours() < 23) return;
@@ -1270,7 +1427,6 @@
       markUnreadAsSeen();
     });
 
-    // Nút xin quyền thông báo trên Safari / Trình duyệt
     const notifPermBtn = document.getElementById("notif-perm-btn");
     const notifStatusText = document.getElementById("notif-status-text");
     if ("Notification" in window && Notification.permission === "granted") {
@@ -1403,6 +1559,234 @@
       e.target.value = "";
     };
 
+    // ==========================================
+    // CAMERA CHỤP ẢNH TRỰC TIẾP CÓ FILTER
+    // ==========================================
+    const camModal = document.getElementById("cam-modal");
+    const camRawVideo = document.getElementById("cam-raw-video");
+    const camCanvas = document.getElementById("cam-canvas");
+    const camCtx = camCanvas.getContext("2d");
+    const camPreviewImg = document.getElementById("cam-preview-img");
+    const camShutterRow = document.getElementById("cam-shutter-row");
+    const camConfirmRow = document.getElementById("cam-confirm-row");
+    const camFilterBar = document.getElementById("cam-filter-bar");
+
+    let camStream = null;
+    let camLoopId = null;
+    let camFacing = "user";
+    let camFilter = "sigma";
+    let capturedDataUrl = "";
+    let camFaceLandmarker = null;
+    let camLastVideoTime = -1;
+    let camCachedLandmarks = null;
+
+    async function initCamFaceLandmarker() {
+      if (camFaceLandmarker) return;
+      try {
+        const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
+        const fileset = await vision.FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+        );
+        camFaceLandmarker = await vision.FaceLandmarker.createFromOptions(fileset, {
+          baseOptions: {
+            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+            delegate: "GPU"
+          },
+          runningMode: "VIDEO",
+          numFaces: 1
+        });
+      } catch (e) {
+        console.warn("Lỗi tải nhận diện khuôn mặt:", e);
+      }
+    }
+
+    function applySigmaEffect(ctx, landmarks, w, h, mirror) {
+      const getPt = (idx) => {
+        const p = landmarks[idx];
+        return { x: (mirror ? (1 - p.x) : p.x) * w, y: p.y * h };
+      };
+
+      const leftFace = getPt(234);
+      const rightFace = getPt(454);
+      const faceW = Math.hypot(rightFace.x - leftFace.x, rightFace.y - leftFace.y);
+
+      // 1. Đánh khối hóp má (Mewing / Hollow Cheeks)
+      const leftCheek = getPt(205);
+      const rightCheek = getPt(425);
+      const cheekR = Math.max(22, faceW * 0.2);
+
+      ctx.save();
+      ctx.globalCompositeOperation = "multiply";
+      [leftCheek, rightCheek].forEach(pt => {
+        const grad = ctx.createRadialGradient(pt.x, pt.y, 2, pt.x, pt.y, cheekR);
+        grad.addColorStop(0, "rgba(75, 45, 30, 0.52)");
+        grad.addColorStop(0.6, "rgba(95, 60, 40, 0.22)");
+        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, cheekR, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 2. Nếp nhăn nhíu mày giữa trán (Sigma Frown)
+      const browCenter = getPt(9);
+      const frownR = Math.max(10, faceW * 0.08);
+      const frownGrad = ctx.createRadialGradient(browCenter.x, browCenter.y, 1, browCenter.x, browCenter.y, frownR);
+      frownGrad.addColorStop(0, "rgba(65, 35, 25, 0.45)");
+      frownGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+      ctx.fillStyle = frownGrad;
+      ctx.beginPath();
+      ctx.arc(browCenter.x, browCenter.y, frownR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. Nhấn sắc nét lông mày nhíu góc cạnh
+      const drawSigmaBrow = (indices) => {
+        ctx.beginPath();
+        indices.forEach((id, i) => {
+          const p = getPt(id);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.strokeStyle = "rgba(25, 18, 15, 0.45)";
+        ctx.lineWidth = Math.max(3, faceW * 0.025);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.filter = "blur(1.5px)";
+        ctx.stroke();
+      };
+      drawSigmaBrow([70, 63, 105, 66, 107]);
+      drawSigmaBrow([300, 293, 334, 296, 336]);
+      ctx.restore();
+
+      // 4. Điểm sáng gò má & môi chu (Highlight)
+      const lipCenter = getPt(14);
+      const lipR = Math.max(12, faceW * 0.09);
+      ctx.save();
+      ctx.globalCompositeOperation = "soft-light";
+      const lipGrad = ctx.createRadialGradient(lipCenter.x, lipCenter.y, 1, lipCenter.x, lipCenter.y, lipR);
+      lipGrad.addColorStop(0, "rgba(255, 210, 200, 0.45)");
+      lipGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = lipGrad;
+      ctx.beginPath();
+      ctx.arc(lipCenter.x, lipCenter.y, lipR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function renderCamLoop() {
+      if (camRawVideo && camRawVideo.readyState >= 2) {
+        const w = camRawVideo.videoWidth || 720;
+        const h = camRawVideo.videoHeight || 960;
+        if (camCanvas.width !== w || camCanvas.height !== h) {
+          camCanvas.width = w;
+          camCanvas.height = h;
+        }
+        const isMirror = camFacing === "user";
+
+        if (camFilter === "sigma") {
+          camCtx.save();
+          if (isMirror) {
+            camCtx.translate(w, 0);
+            camCtx.scale(-1, 1);
+          }
+          camCtx.filter = "contrast(1.18) saturate(1.06) brightness(0.98)";
+          camCtx.drawImage(camRawVideo, 0, 0, w, h);
+          camCtx.filter = "none";
+          camCtx.restore();
+
+          if (camFaceLandmarker) {
+            if (camRawVideo.currentTime !== camLastVideoTime) {
+              camLastVideoTime = camRawVideo.currentTime;
+              const res = camFaceLandmarker.detectForVideo(camRawVideo, performance.now());
+              camCachedLandmarks = res.faceLandmarks?.[0] || null;
+            }
+            if (camCachedLandmarks) {
+              applySigmaEffect(camCtx, camCachedLandmarks, w, h, isMirror);
+            }
+          }
+        } else {
+          window.drawFilteredFrame(camCtx, camRawVideo, w, h, camFilter, isMirror);
+        }
+      }
+      camLoopId = requestAnimationFrame(renderCamLoop);
+    }
+
+    async function startCameraModal() {
+      try {
+        if (camStream) camStream.getTracks().forEach(t => t.stop());
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: camFacing, width: { ideal: 960 }, height: { ideal: 1280 } },
+          audio: false
+        });
+        camRawVideo.srcObject = camStream;
+        await camRawVideo.play();
+        initCamFaceLandmarker();
+        camModal.style.display = "flex";
+        resetCamToLive();
+        if (camLoopId) cancelAnimationFrame(camLoopId);
+        renderCamLoop();
+      } catch (err) {
+        alert("Không thể mở camera: " + err.message);
+      }
+    }
+    function resetCamToLive() {
+      capturedDataUrl = "";
+      camPreviewImg.style.display = "none";
+      camShutterRow.style.display = "flex";
+      camConfirmRow.style.display = "none";
+      camFilterBar.style.display = "flex";
+    }
+
+    function closeCameraModal() {
+      if (camLoopId) cancelAnimationFrame(camLoopId);
+      if (camStream) camStream.getTracks().forEach(t => t.stop());
+      camStream = null;
+      camModal.style.display = "none";
+    }
+
+    document.getElementById("open-cam-btn").onclick = startCameraModal;
+    document.getElementById("cam-close-btn").onclick = closeCameraModal;
+
+    document.getElementById("cam-flip-btn").onclick = () => {
+      camFacing = camFacing === "user" ? "environment" : "user";
+      startCameraModal();
+    };
+
+    document.querySelectorAll("[data-camfilter]").forEach(btn => {
+      btn.onclick = () => {
+        camFilter = btn.dataset.camfilter;
+        document.querySelectorAll("[data-camfilter]").forEach(b => {
+          b.classList.toggle("active", b.dataset.camfilter === camFilter);
+        });
+      };
+    });
+
+    document.getElementById("cam-shutter-btn").onclick = () => {
+      const maxW = 720;
+      const ratio = Math.min(maxW / camCanvas.width, 1);
+      const outCanvas = document.createElement("canvas");
+      outCanvas.width = camCanvas.width * ratio;
+      outCanvas.height = camCanvas.height * ratio;
+      outCanvas.getContext("2d").drawImage(camCanvas, 0, 0, outCanvas.width, outCanvas.height);
+
+      capturedDataUrl = outCanvas.toDataURL("image/jpeg", 0.68);
+      camPreviewImg.src = capturedDataUrl;
+      camPreviewImg.style.display = "block";
+      camShutterRow.style.display = "none";
+      camFilterBar.style.display = "none";
+      camConfirmRow.style.display = "flex";
+    };
+
+    document.getElementById("cam-retake-btn").onclick = resetCamToLive;
+
+    document.getElementById("cam-send-btn").onclick = async () => {
+      if (!capturedDataUrl) return;
+      const imgToSend = capturedDataUrl;
+      closeCameraModal();
+      await sendPayload({ type: "image", media: imgToSend });
+    };
+
+    // Ghi âm Voice
     let mediaRecorder = null;
     let audioChunks = [];
     const voiceBtn = document.getElementById("voice-btn");
@@ -1493,45 +1877,14 @@
           localCanvas.width = w;
           localCanvas.height = h;
         }
-
-        canvasCtx.save();
-        if (facingMode === "user") {
-          canvasCtx.translate(w, 0);
-          canvasCtx.scale(-1, 1);
-        }
-
-        if (activeFilter === "phaelo85") {
-          canvasCtx.filter = "brightness(1.08) contrast(0.95) saturate(1.08) sepia(0.08)";
-        } else if (activeFilter === "peach") {
-          canvasCtx.filter = "brightness(1.07) contrast(0.97) saturate(1.16)";
-        } else if (activeFilter === "milky") {
-          canvasCtx.filter = "brightness(1.13) contrast(0.92) saturate(0.94)";
-        } else if (activeFilter === "vintage") {
-          canvasCtx.filter = "brightness(1.03) contrast(1.05) sepia(0.24) saturate(1.1)";
-        } else {
-          canvasCtx.filter = "none";
-        }
-
-        canvasCtx.drawImage(rawVideo, 0, 0, w, h);
-        canvasCtx.filter = "none";
-
-        if (activeFilter === "phaelo85" || activeFilter === "milky") {
-          canvasCtx.save();
-          canvasCtx.globalAlpha = 0.22;
-          canvasCtx.globalCompositeOperation = "screen";
-          canvasCtx.filter = "blur(10px)";
-          canvasCtx.drawImage(rawVideo, 0, 0, w, h);
-          canvasCtx.restore();
-        }
-
-        canvasCtx.restore();
+        window.drawFilteredFrame(canvasCtx, rawVideo, w, h, activeFilter, facingMode === "user");
         renderLoopId = requestAnimationFrame(renderFrame);
       }
       renderFrame();
     }
 
     function updateFilterUI() {
-      document.querySelectorAll(".filter-chip").forEach(btn => {
+      document.querySelectorAll("[data-filter]").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.filter === activeFilter);
       });
       const toggleBtn = document.getElementById("toggle-filter-btn");
@@ -1539,7 +1892,7 @@
       toggleBtn.style.color = activeFilter === "none" ? "#fff" : "#050505";
     }
 
-    document.querySelectorAll(".filter-chip").forEach(btn => {
+    document.querySelectorAll("[data-filter]").forEach(btn => {
       btn.onclick = () => {
         activeFilter = btn.dataset.filter;
         if (activeFilter !== "none") lastActiveFilter = activeFilter;
