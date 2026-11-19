@@ -344,7 +344,6 @@
     @keyframes pulseRec { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
     .input-pill {
       flex: 1;
-      min-width: 0;
       background: #f0f2f5;
       border-radius: 20px;
       padding: 7px 14px;
@@ -733,9 +732,6 @@
       </div>
     </div>
     <div class="header-right">
-      <button type="button" class="header-icon-btn" id="open-cam-btn" title="Chụp ảnh có Filter">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-      </button>
       <button type="button" class="header-icon-btn" id="audio-call-btn" title="Gọi thoại">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
       </button>
@@ -763,6 +759,16 @@
     <button type="button" class="action-icon" id="open-cam-btn" title="Chụp ảnh có Filter">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
     </button>
+    <button type="button" class="action-icon" id="img-btn" title="Chọn ảnh từ thư viện">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+    </button>
+    <button type="button" class="action-icon" id="voice-btn" title="Ghi âm">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+    </button>
+    <div class="input-pill">
+      <textarea id="msg-input" rows="1" placeholder="Nhắn tin..."></textarea>
+    </div>
+    <button type="button" id="send-btn" title="Gửi">❤️</button>
   </footer>
 
   <!-- Bottom Sheet Cài đặt -->
@@ -822,9 +828,12 @@
     </div>
 
     <div class="cam-bottom-bar">
-     <div class="filter-scroll-bar" id="cam-filter-bar">
+      <div class="filter-scroll-bar" id="cam-filter-bar">
         <button type="button" class="filter-chip off-btn" data-camfilter="none">🚫 Tắt Filter</button>
-        <button type="button" class="filter-chip active" data-camfilter="sigma">🗿 Sigma Face</button>
+        <button type="button" class="filter-chip active" data-camfilter="phaelo85">✨ Phaelo 85</button>
+        <button type="button" class="filter-chip" data-camfilter="peach">🍑 Hồng Đào</button>
+        <button type="button" class="filter-chip active" data-camfilter="sigma">🗿 Sigma Face</button>        <button type="button" class="filter-chip" data-camfilter="vintage">🎞️ Film Ấm</button>
+        <button type="button" class="filter-chip" data-camfilter="bw">🖤 Đen Trắng</button>
       </div>
 
       <div class="cam-shutter-row" id="cam-shutter-row">
@@ -1723,6 +1732,7 @@
         alert("Không thể mở camera: " + err.message);
       }
     }
+
     function resetCamToLive() {
       capturedDataUrl = "";
       camPreviewImg.style.display = "none";
