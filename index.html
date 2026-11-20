@@ -8,730 +8,136 @@
   <meta name="apple-mobile-web-app-title" content="Mét sê gi" />
   <title>Mét sê gi</title>
   <style>
-    :root {
-      --theme-main: #0084ff;
-      --theme-grad: linear-gradient(135deg, #0099ff, #0066ff);
-    }
+    :root { --theme-main: #0084ff; --theme-grad: linear-gradient(135deg, #0099ff, #0066ff); }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body { background: #ffffff; height: 100%; overflow: hidden; }
-    body {
-      display: flex;
-      flex-direction: column;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
+    html, body { background: #fff; height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; background-size: cover; background-position: center; background-repeat: no-repeat; }
 
-    /* Banner thông báo nổi khi nhận tin nhắn */
-    #inapp-toast {
-      position: fixed;
-      top: calc(env(safe-area-inset-top) + 10px);
-      left: 12px;
-      right: 12px;
-      background: rgba(28, 28, 30, 0.94);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 16px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.28);
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transform: translateY(-140%);
-      transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
-      cursor: pointer;
-    }
+    /* Thông báo nổi */
+    #inapp-toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; background: rgba(28,28,30,.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #fff; padding: 12px 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.28); z-index: 200; display: flex; align-items: center; gap: 12px; transform: translateY(-140%); transition: transform .3s cubic-bezier(.2,.9,.3,1); cursor: pointer; }
     #inapp-toast.show { transform: translateY(0); }
-    .toast-av {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--theme-grad);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 15px;
-      flex-shrink: 0;
-    }
+    .toast-av { width: 36px; height: 36px; border-radius: 50%; background: var(--theme-grad); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
     .toast-body { min-width: 0; flex: 1; }
     .toast-title { font-size: 13.5px; font-weight: 700; }
-    .toast-msg { font-size: 13px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .toast-msg { font-size: 13px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
-    /* Header chuẩn Messenger */
-    header {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: calc(env(safe-area-inset-top) + 8px) 12px 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
-      z-index: 20;
-    }
-    .chat-partner {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 0;
-    }
-    .avatar-wrap {
-      position: relative;
-      width: 38px;
-      height: 38px;
-      flex-shrink: 0;
-    }
-    .avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--theme-grad);
-      color: #fff;
-      font-weight: 700;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-    }
-    .online-dot {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 11px;
-      height: 11px;
-      background: #31a24c;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      display: none;
-    }
+    /* Header */
+    header { background: rgba(255,255,255,.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: calc(env(safe-area-inset-top) + 8px) 12px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: .5px solid rgba(0,0,0,.08); z-index: 20; }
+    .chat-partner { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .avatar-wrap { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
+    .avatar, .mini-avatar { border-radius: 50%; background: var(--theme-grad); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar { width: 38px; height: 38px; font-size: 16px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+    .online-dot { position: absolute; bottom: 0; right: 0; width: 11px; height: 11px; background: #31a24c; border: 2px solid #fff; border-radius: 50%; display: none; }
     .online-dot.active { display: block; }
-    .partner-info {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-    .partner-name {
-      font-size: 15.5px;
-      font-weight: 700;
-      color: #050505;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .partner-status {
-      font-size: 11.5px;
-      color: #65676b;
-      margin-top: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-    .header-icon-btn {
-      background: #f0f2f5;
-      border: none;
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--theme-main);
-      cursor: pointer;
-    }
-    .header-icon-btn:active { transform: scale(0.92); }
+    .partner-info { display: flex; flex-direction: column; min-width: 0; }
+    .partner-name { font-size: 15.5px; font-weight: 700; color: #050505; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .partner-status { font-size: 11.5px; color: #65676b; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .header-icon-btn { background: #f0f2f5; border: none; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: var(--theme-main); cursor: pointer; }
+    .header-icon-btn:active { transform: scale(.92); }
 
-    /* Khu vực tin nhắn */
-    #chat-box {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 12px 8px;
-      display: flex;
-      flex-direction: column;
-      -webkit-overflow-scrolling: touch;
-    }
-    .msg-group {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 2px;
-    }
+    /* Chat */
+    #chat-box { flex: 1; overflow-y: auto; padding: 12px 12px 8px; display: flex; flex-direction: column; -webkit-overflow-scrolling: touch; }
+    .msg-group { display: flex; flex-direction: column; margin-bottom: 2px; }
     .msg-group.new-block { margin-top: 10px; }
     .msg-group.me { align-items: flex-end; }
     .msg-group.other { align-items: flex-start; }
-
-    /* Thẻ thông báo lịch học hệ thống */
-    .schedule-card {
-      align-self: center;
-      width: 92%;
-      max-width: 360px;
-      background: rgba(255, 255, 255, 0.96);
-      border: 1px solid rgba(0, 132, 255, 0.25);
-      border-radius: 18px;
-      padding: 13px 15px;
-      margin: 12px 0;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-      font-size: 13.5px;
-      line-height: 1.48;
-      color: #1c1e21;
-    }
-    .schedule-card-header {
-      font-weight: 700;
-      color: var(--theme-main);
-      font-size: 14px;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #f0f2f5;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sender-name-tag {
-      font-size: 11px;
-      font-weight: 600;
-      color: #65676b;
-      margin: 0 0 3px 36px;
-      background: rgba(255,255,255,0.75);
-      padding: 1px 6px;
-      border-radius: 6px;
-    }
-    .bubble-line {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      max-width: 80%;
-    }
+    .schedule-card { align-self: center; width: 92%; max-width: 360px; background: rgba(255,255,255,.96); border: 1px solid rgba(0,132,255,.25); border-radius: 18px; padding: 13px 15px; margin: 12px 0; box-shadow: 0 4px 14px rgba(0,0,0,.08); font-size: 13.5px; line-height: 1.48; color: #1c1e21; }
+    .schedule-card-header { font-weight: 700; color: var(--theme-main); font-size: 14px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f2f5; }
+    .sender-name-tag { font-size: 11px; font-weight: 600; color: #65676b; margin: 0 0 3px 36px; background: rgba(255,255,255,.75); padding: 1px 6px; border-radius: 6px; }
+    .bubble-line { display: flex; align-items: flex-end; gap: 8px; max-width: 80%; }
     .msg-group.me .bubble-line { flex-direction: row-reverse; }
-
-    .mini-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--theme-grad);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+    .mini-avatar { width: 28px; height: 28px; font-size: 12px; }
     .mini-avatar.hidden { visibility: hidden; }
-
-    .bubble {
-      padding: 9px 14px;
-      border-radius: 20px;
-      font-size: 15.5px;
-      line-height: 1.38;
-      word-wrap: break-word;
-      position: relative;
-    }
-    .msg-group.me .bubble {
-      background: var(--theme-grad);
-      color: #ffffff;
-      border-bottom-right-radius: 5px;
-    }
-    .msg-group.other .bubble {
-      background: #f0f2f5;
-      color: #050505;
-      border-bottom-left-radius: 5px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .bubble.media-bubble {
-      padding: 3px;
-      background: transparent !important;
-      box-shadow: none;
-    }
-    .bubble img {
-      max-width: 230px;
-      max-height: 300px;
-      border-radius: 18px;
-      display: block;
-      object-fit: cover;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    }
-    .bubble audio {
-      max-width: 215px;
-      height: 36px;
-      display: block;
-    }
-    .bubble.heart-only {
-      background: transparent !important;
-      font-size: 38px;
-      padding: 2px 4px;
-      line-height: 1.1;
-    }
-    .msg-meta {
-      font-size: 11px;
-      color: #65676b;
-      margin-top: 3px;
-      padding: 1px 6px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.75);
-      display: none;
-    }
+    .bubble { padding: 9px 14px; border-radius: 20px; font-size: 15.5px; line-height: 1.38; word-wrap: break-word; }
+    .msg-group.me .bubble { background: var(--theme-grad); color: #fff; border-bottom-right-radius: 5px; }
+    .msg-group.other .bubble { background: #f0f2f5; color: #050505; border-bottom-left-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+    .bubble.media-bubble { padding: 3px; background: transparent !important; box-shadow: none; }
+    .bubble img { max-width: 230px; max-height: 300px; border-radius: 18px; display: block; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .bubble.heart-only { background: transparent !important; font-size: 38px; padding: 2px 4px; line-height: 1.1; }
+    .msg-meta { font-size: 11px; color: #65676b; margin-top: 3px; padding: 1px 6px; border-radius: 8px; background: rgba(255,255,255,.75); display: none; }
     .msg-meta.show-always { display: inline-block; font-weight: 600; }
 
-    /* Bong bóng đang nhập */
-    #typing-bubble-row {
-      display: none;
-      align-items: flex-end;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .typing-dots {
-      background: #f0f2f5;
-      padding: 11px 15px;
-      border-radius: 20px;
-      border-bottom-left-radius: 5px;
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
-    .typing-dots span {
-      width: 7px;
-      height: 7px;
-      background: #8a8d91;
-      border-radius: 50%;
-      animation: messengerTyping 1.3s infinite ease-in-out;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.18s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.36s; }
-    @keyframes messengerTyping {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-      30% { transform: translateY(-4px); opacity: 1; }
-    }
+    /* Typing */
+    #typing-bubble-row { display: none; align-items: flex-end; gap: 8px; margin-top: 8px; }
+    .typing-dots { background: #f0f2f5; padding: 11px 15px; border-radius: 20px; border-bottom-left-radius: 5px; display: flex; gap: 4px; }
+    .typing-dots span { width: 7px; height: 7px; background: #8a8d91; border-radius: 50%; animation: mType 1.3s infinite ease-in-out; }
+    .typing-dots span:nth-child(2) { animation-delay: .18s; }
+    .typing-dots span:nth-child(3) { animation-delay: .36s; }
+    @keyframes mType { 0%,60%,100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-4px); opacity: 1; } }
 
-    /* Footer nhập liệu */
-    footer {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 8px 8px calc(env(safe-area-inset-bottom) + 8px);
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-      border-top: 0.5px solid rgba(0, 0, 0, 0.08);
-    }
-    .action-icon {
-      background: transparent;
-      border: none;
-      width: 32px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--theme-main);
-      cursor: pointer;
-      flex-shrink: 0;
-      border-radius: 50%;
-    }
-    .action-icon.recording {
-      background: #ff3b30;
-      color: #fff;
-      animation: pulseRec 1s infinite;
-    }
-    @keyframes pulseRec { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
-    .input-pill {
-      flex: 1;
-      background: #f0f2f5;
-      border-radius: 20px;
-      padding: 7px 14px;
-      display: flex;
-      align-items: center;
-      min-height: 36px;
-    }
-    #msg-input {
-      width: 100%;
-      border: none;
-      background: transparent;
-      font-size: 16px;
-      line-height: 1.35;
-      outline: none;
-      color: #050505;
-      resize: none;
-      max-height: 96px;
-    }
-    #send-btn {
-      background: transparent;
-      border: none;
-      width: 34px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--theme-main);
-      font-size: 20px;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
+    /* Footer */
+    footer { background: rgba(255,255,255,.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 8px 10px calc(env(safe-area-inset-bottom) + 8px); display: flex; align-items: flex-end; gap: 8px; border-top: .5px solid rgba(0,0,0,.08); }
+    .action-icon, #send-btn { background: transparent; border: none; width: 34px; height: 36px; display: flex; align-items: center; justify-content: center; color: var(--theme-main); cursor: pointer; flex-shrink: 0; }
+    #send-btn { font-size: 20px; }
+    .input-pill { flex: 1; min-width: 0; background: #f0f2f5; border-radius: 20px; padding: 7px 14px; display: flex; align-items: center; min-height: 36px; }
+    #msg-input { width: 100%; border: none; background: transparent; font-size: 16px; line-height: 1.35; outline: none; color: #050505; resize: none; max-height: 96px; }
 
-    /* Bottom Sheet Cài đặt */
-    #sheet-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 50;
-      display: none;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-    }
-    #settings-sheet {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #fff;
-      border-top-left-radius: 22px;
-      border-top-right-radius: 22px;
-      padding: 12px 18px calc(env(safe-area-inset-bottom) + 20px);
-      z-index: 60;
-      transform: translateY(100%);
-      transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
-      max-height: 85vh;
-      overflow-y: auto;
-    }
+    /* Bottom Sheet */
+    #sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 50; display: none; opacity: 0; transition: opacity .25s; }
+    #settings-sheet { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 22px 22px 0 0; padding: 12px 18px calc(env(safe-area-inset-bottom) + 20px); z-index: 60; transform: translateY(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1); box-shadow: 0 -4px 24px rgba(0,0,0,.15); max-height: 85vh; overflow-y: auto; }
     #settings-sheet.open { transform: translateY(0); }
-    .sheet-handle {
-      width: 38px;
-      height: 5px;
-      background: #d1d1d6;
-      border-radius: 3px;
-      margin: 0 auto 14px;
-    }
-    .sheet-title {
-      font-size: 17px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 16px;
-      color: #050505;
-    }
+    .sheet-handle { width: 38px; height: 5px; background: #d1d1d6; border-radius: 3px; margin: 0 auto 14px; }
+    .sheet-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 16px; color: #050505; }
     .sheet-section { margin-bottom: 14px; }
-    .sheet-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #65676b;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .role-toggle-box {
-      display: flex;
-      background: #f0f2f5;
-      border-radius: 12px;
-      padding: 3px;
-    }
-    .role-choice {
-      flex: 1;
-      border: none;
-      background: transparent;
-      padding: 9px;
-      border-radius: 9px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #65676b;
-      cursor: pointer;
-    }
-    .role-choice.active {
-      background: #fff;
-      color: var(--theme-main);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    .color-grid {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .color-swatch {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 3px solid transparent;
-      cursor: pointer;
-    }
-    .color-swatch.active {
-      border-color: #050505;
-      transform: scale(1.1);
-    }
-    .menu-btn {
-      width: 100%;
-      background: #f0f2f5;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 14.5px;
-      font-weight: 600;
-      color: #050505;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
+    .sheet-label { font-size: 12px; font-weight: 600; color: #65676b; text-transform: uppercase; margin-bottom: 8px; }
+    .role-toggle-box { display: flex; background: #f0f2f5; border-radius: 12px; padding: 3px; }
+    .role-choice { flex: 1; border: none; background: transparent; padding: 9px; border-radius: 9px; font-size: 14px; font-weight: 700; color: #65676b; cursor: pointer; }
+    .role-choice.active { background: #fff; color: var(--theme-main); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+    .color-grid { display: flex; justify-content: space-between; gap: 8px; }
+    .color-swatch { width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; }
+    .color-swatch.active { border-color: #050505; transform: scale(1.1); }
+    .menu-btn { width: 100%; background: #f0f2f5; border: none; border-radius: 12px; padding: 12px 14px; font-size: 14.5px; font-weight: 600; color: #050505; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; cursor: pointer; }
     .menu-btn.danger { color: #ff3b30; background: #fff0f0; }
 
-    /* Màn hình Chụp Ảnh + Filter trực tiếp */
-    #cam-modal {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 120;
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-    #cam-canvas, #cam-preview-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-    }
+    /* Camera & Call Overlays */
+    .full-overlay { position: fixed; inset: 0; background: #111318; z-index: 100; display: none; flex-direction: column; justify-content: space-between; color: #fff; overflow: hidden; }
+    #cam-modal { background: #000; z-index: 120; }
+    .full-media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+    .mirror { transform: scaleX(-1); }
     #cam-preview-img { display: none; z-index: 2; }
-    .cam-top-bar {
-      position: relative;
-      z-index: 5;
-      padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-    }
-    .cam-round-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(8px);
-      color: #fff;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .cam-bottom-bar {
-      position: relative;
-      z-index: 5;
-      padding: 16px 12px calc(env(safe-area-inset-bottom) + 26px);
-      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .cam-shutter-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 28px;
-    }
-    #cam-shutter-btn {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      background: rgba(255,255,255,0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    #cam-shutter-btn::after {
-      content: "";
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #fff;
-      transition: transform 0.1s;
-    }
-    #cam-shutter-btn:active::after { transform: scale(0.88); }
+    .cam-top-bar { position: relative; z-index: 5; padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; display: flex; justify-content: space-between; background: linear-gradient(to bottom, rgba(0,0,0,.6), transparent); }
+    .cam-round-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,.45); backdrop-filter: blur(8px); color: #fff; font-size: 18px; cursor: pointer; }
+    .overlay-bottom { position: relative; z-index: 6; padding: 18px 12px calc(env(safe-area-inset-bottom) + 26px); background: linear-gradient(to top, rgba(0,0,0,.85), transparent); }
+    .cam-shutter-row { display: flex; justify-content: center; }
+    #cam-shutter-btn { width: 72px; height: 72px; border-radius: 50%; border: 4px solid #fff; background: rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    #cam-shutter-btn::after { content: ""; width: 56px; height: 56px; border-radius: 50%; background: #fff; transition: transform .1s; }
+    #cam-shutter-btn:active::after { transform: scale(.88); }
+    .cam-confirm-row { display: none; justify-content: space-between; padding: 0 18px; }
+    .cam-pill { border: none; border-radius: 24px; padding: 12px 24px; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; }
+    .cam-pill.retake { background: rgba(255,255,255,.2); backdrop-filter: blur(8px); }
+    .cam-pill.send { background: var(--theme-grad); box-shadow: 0 4px 14px rgba(0,132,255,.4); }
 
-    .cam-confirm-row {
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 18px;
-    }
-    .cam-action-pill {
-      border: none;
-      border-radius: 24px;
-      padding: 12px 24px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .cam-action-pill.retake { background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(8px); }
-    .cam-action-pill.send { background: var(--theme-grad); color: #fff; box-shadow: 0 4px 14px rgba(0,132,255,0.4); }
-
-    /* Màn hình Gọi Thoại & Video Call + Filter */
-    #call-overlay {
-      position: fixed;
-      inset: 0;
-      background: #111318;
-      z-index: 100;
-      display: none;
-      flex-direction: column;
-      justify-content: space-between;
-      color: #fff;
-      overflow: hidden;
-    }
-    #remote-video {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      background: #18191a;
-      z-index: 1;
-    }
-    #local-preview-wrap {
-      position: absolute;
-      top: calc(env(safe-area-inset-top) + 16px);
-      right: 16px;
-      width: 108px;
-      height: 156px;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.35);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-      z-index: 5;
-      background: #222;
-    }
-    #local-canvas {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    #call-top-info {
-      position: relative;
-      z-index: 4;
-      padding-top: calc(env(safe-area-inset-top) + 46px);
-      text-align: center;
-      pointer-events: none;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.65);
-    }
-    .call-avatar-big {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      background: var(--theme-grad);
-      margin: 0 auto 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 34px;
-      font-weight: 700;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    }
+    #local-preview-wrap { position: absolute; top: calc(env(safe-area-inset-top) + 16px); right: 16px; width: 108px; height: 156px; border-radius: 16px; overflow: hidden; border: 2px solid rgba(255,255,255,.35); box-shadow: 0 6px 20px rgba(0,0,0,.45); z-index: 5; background: #222; }
+    #local-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #call-top-info { position: relative; z-index: 4; padding-top: calc(env(safe-area-inset-top) + 46px); text-align: center; pointer-events: none; text-shadow: 0 2px 8px rgba(0,0,0,.65); }
+    .call-avatar-big { width: 84px; height: 84px; border-radius: 50%; background: var(--theme-grad); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
     #call-peer-name { font-size: 24px; font-weight: 700; }
-    #call-status-label { font-size: 14px; opacity: 0.85; margin-top: 6px; }
-
-    #call-bottom-area {
-      position: relative;
-      z-index: 6;
-      padding: 16px 12px calc(env(safe-area-inset-bottom) + 24px);
-      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .filter-scroll-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 4px 6px;
-      scrollbar-width: none;
-    }
-    .filter-scroll-bar::-webkit-scrollbar { display: none; }
-    .filter-chip {
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(10px);
-      border: 1.5px solid transparent;
-      color: #fff;
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .filter-chip.active {
-      background: rgba(255,255,255,0.92);
-      color: #050505;
-      border-color: #fff;
-    }
-    .filter-chip.off-btn {
-      background: rgba(255, 59, 48, 0.25);
-      border-color: rgba(255, 59, 48, 0.6);
-    }
-    .filter-chip.off-btn.active {
-      background: #ff3b30;
-      color: #fff;
-    }
-
-    .call-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 18px;
-    }
-    .c-btn {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      color: #fff;
-      font-size: 21px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
+    #call-status-label { font-size: 14px; opacity: .85; margin-top: 6px; }
+    .call-controls { display: flex; justify-content: center; align-items: center; gap: 18px; }
+    .c-btn { width: 54px; height: 54px; border-radius: 50%; border: none; background: rgba(255,255,255,.2); backdrop-filter: blur(10px); color: #fff; font-size: 21px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .c-btn.muted { background: #fff; color: #050505; }
     .c-btn.end-call { background: #ff3b30; width: 62px; height: 62px; font-size: 24px; }
     .c-btn.accept-call { background: #31a24c; width: 62px; height: 62px; font-size: 24px; }
+    #mini-call-bar { display: none; background: #31a24c; color: #fff; padding: 8px 14px; font-size: 13.5px; font-weight: 600; justify-content: space-between; align-items: center; cursor: pointer; z-index: 19; }
+    #call-pip-btn { position: absolute; top: calc(env(safe-area-inset-top) + 16px); left: 16px; z-index: 7; font-size: 22px; }
   </style>
 </head>
 <body>
-  <!-- Banner thông báo tin nhắn mới -->
   <div id="inapp-toast">
     <div class="toast-av" id="toast-av">E</div>
-    <div class="toast-body">
-      <div class="toast-title" id="toast-title">Tin nhắn mới</div>
-      <div class="toast-msg" id="toast-msg">...</div>
-    </div>
+    <div class="toast-body"><div class="toast-title" id="toast-title">Tin nhắn mới</div><div class="toast-msg" id="toast-msg">...</div></div>
   </div>
 
   <header>
     <div class="chat-partner">
-      <div class="avatar-wrap">
-        <div class="avatar" id="partner-avatar">E</div>
-        <div class="online-dot" id="partner-online-dot"></div>
-      </div>
-      <div class="partner-info">
-        <div class="partner-name" id="partner-name">Em</div>
-        <div class="partner-status" id="partner-status">Đang kiểm tra...</div>
-      </div>
+      <div class="avatar-wrap"><div class="avatar" id="partner-avatar">E</div><div class="online-dot" id="partner-online-dot"></div></div>
+      <div class="partner-info"><div class="partner-name" id="partner-name">Em</div><div class="partner-status" id="partner-status">Đang kiểm tra...</div></div>
     </div>
     <div class="header-right">
+      <button type="button" class="header-icon-btn" id="open-cam-btn" title="Chụp ảnh">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+      </button>
       <button type="button" class="header-icon-btn" id="audio-call-btn" title="Gọi thoại">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
       </button>
@@ -743,577 +149,95 @@
       </button>
     </div>
   </header>
+  <div id="mini-call-bar"><span>📞 Đang trong cuộc gọi • Bấm để quay lại</span><span id="mini-call-time">00:00</span></div>
 
-  <input type="file" id="bg-input" accept="image/*" style="display:none" />
-  <input type="file" id="img-input" accept="image/*" style="display:none" />
+  <input type="file" id="bg-input" accept="image/*" hidden />
+  <input type="file" id="img-input" accept="image/*" hidden />
 
   <div id="chat-box">
     <div id="messages-container"></div>
-    <div id="typing-bubble-row">
-      <div class="mini-avatar" id="typing-avatar">E</div>
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-    </div>
+    <div id="typing-bubble-row"><div class="mini-avatar" id="typing-avatar">E</div><div class="typing-dots"><span></span><span></span><span></span></div></div>
   </div>
 
   <footer>
-    <button type="button" class="action-icon" id="open-cam-btn" title="Chụp ảnh có Filter">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
-    </button>
     <button type="button" class="action-icon" id="img-btn" title="Chọn ảnh từ thư viện">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
     </button>
-    <button type="button" class="action-icon" id="voice-btn" title="Ghi âm">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
-    </button>
-    <div class="input-pill">
-      <textarea id="msg-input" rows="1" placeholder="Nhắn tin..."></textarea>
-    </div>
+    <div class="input-pill"><textarea id="msg-input" rows="1" placeholder="Nhắn tin..."></textarea></div>
     <button type="button" id="send-btn" title="Gửi">❤️</button>
   </footer>
 
-  <!-- Bottom Sheet Cài đặt -->
+  <!-- Cài đặt -->
   <div id="sheet-backdrop"></div>
   <div id="settings-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Tùy chỉnh cuộc trò chuyện</div>
-
     <div class="sheet-section">
       <div class="sheet-label">Bạn đang nhắn với tư cách</div>
-      <div class="role-toggle-box">
-        <button type="button" class="role-choice" id="choice-anh">Anh</button>
-        <button type="button" class="role-choice" id="choice-em">Em</button>
-      </div>
+      <div class="role-toggle-box"><button type="button" class="role-choice" id="choice-anh">Anh</button><button type="button" class="role-choice" id="choice-em">Em</button></div>
     </div>
-
     <div class="sheet-section">
       <div class="sheet-label">Màu chủ đề (Đồng bộ cả 2 bên)</div>
       <div class="color-grid" id="color-grid"></div>
     </div>
-
     <div class="sheet-section">
-      <button type="button" class="menu-btn" id="notif-perm-btn">
-        <span>🔔 Bật thông báo & âm thanh tin nhắn</span>
-        <span id="notif-status-text" style="color:var(--theme-main);font-size:13px;">Bật</span>
-      </button>
-      <button type="button" class="menu-btn" id="send-tkb-now-btn">
-        <span>📅 Gửi ngay lịch học ngày mai vào chat</span>
-        <span style="color:var(--theme-main);font-size:13px;">23:00 Tự động</span>
-      </button>
-      <button type="button" class="menu-btn" id="rename-btn">
-        <span>✏️ Đổi biệt danh Anh / Em</span>
-        <span id="rename-preview" style="color:#65676b;font-size:13px;">Anh & Em</span>
-      </button>
-      <button type="button" class="menu-btn" id="bg-btn">
-        <span>🖼️ Đổi ảnh nền cuộc trò chuyện</span>
-        <span style="color:var(--theme-main);font-size:13px;">Chọn ảnh</span>
-      </button>
-      <button type="button" class="menu-btn" id="remove-bg-btn" style="display:none;">
-        <span>🧹 Gỡ ảnh nền hiện tại</span>
-      </button>
-      <button type="button" class="menu-btn danger" id="clear-btn">
-        <span>🗑️ Xóa toàn bộ đoạn chat</span>
-      </button>
+      <button type="button" class="menu-btn" id="notif-perm-btn"><span>🔔 Bật thông báo & âm thanh tin nhắn</span><span id="notif-status-text" style="color:var(--theme-main);font-size:13px;">Bật</span></button>
+      <button type="button" class="menu-btn" id="send-tkb-now-btn"><span>📅 Gửi ngay lịch học ngày mai vào chat</span><span style="color:var(--theme-main);font-size:13px;">23:00 Tự động</span></button>
+      <button type="button" class="menu-btn" id="rename-btn"><span>✏️ Đổi biệt danh Anh / Em</span><span id="rename-preview" style="color:#65676b;font-size:13px;">Anh & Em</span></button>
+      <button type="button" class="menu-btn" id="bg-btn"><span>🖼️ Đổi ảnh nền cuộc trò chuyện</span><span style="color:var(--theme-main);font-size:13px;">Chọn ảnh</span></button>
+      <button type="button" class="menu-btn" id="remove-bg-btn" style="display:none;"><span>🧹 Gỡ ảnh nền hiện tại</span></button>
+      <button type="button" class="menu-btn danger" id="clear-btn"><span>🗑️ Xóa toàn bộ đoạn chat</span></button>
     </div>
   </div>
 
-  <!-- Màn hình Camera Chụp Ảnh + Filter -->
-  <div id="cam-modal">
-    <video id="cam-raw-video" autoplay playsinline muted style="display:none"></video>
-    <canvas id="cam-canvas"></canvas>
-    <img id="cam-preview-img" alt="Xem trước ảnh" />
-
+  <!-- Camera chụp ảnh -->
+  <div id="cam-modal" class="full-overlay">
+    <video id="cam-video" class="full-media mirror" autoplay playsinline muted></video>
+    <img id="cam-preview-img" class="full-media" alt="Xem trước" />
     <div class="cam-top-bar">
-      <button type="button" class="cam-round-btn" id="cam-close-btn" title="Đóng">✖️</button>
-      <button type="button" class="cam-round-btn" id="cam-flip-btn" title="Đổi camera">🔄</button>
+      <button type="button" class="cam-round-btn" id="cam-close-btn">✖️</button>
+      <button type="button" class="cam-round-btn" id="cam-flip-btn">🔄</button>
     </div>
-
-    <div class="cam-bottom-bar">
-      <div class="filter-scroll-bar" id="cam-filter-bar">
-        <button type="button" class="filter-chip off-btn" data-camfilter="none">🚫 Tắt Filter</button>
-        <button type="button" class="filter-chip active" data-camfilter="phaelo85">✨ Phaelo 85</button>
-        <button type="button" class="filter-chip" data-camfilter="peach">🍑 Hồng Đào</button>
-        <button type="button" class="filter-chip active" data-camfilter="sigma">🗿 Sigma Face</button>        <button type="button" class="filter-chip" data-camfilter="vintage">🎞️ Film Ấm</button>
-        <button type="button" class="filter-chip" data-camfilter="bw">🖤 Đen Trắng</button>
-      </div>
-
-      <div class="cam-shutter-row" id="cam-shutter-row">
-        <button type="button" id="cam-shutter-btn" title="Chụp ảnh"></button>
-      </div>
-
+    <div class="overlay-bottom">
+      <div class="cam-shutter-row" id="cam-shutter-row"><button type="button" id="cam-shutter-btn"></button></div>
       <div class="cam-confirm-row" id="cam-confirm-row">
-        <button type="button" class="cam-action-pill retake" id="cam-retake-btn">Chụp lại</button>
-        <button type="button" class="cam-action-pill send" id="cam-send-btn">Gửi ảnh ➤</button>
+        <button type="button" class="cam-pill retake" id="cam-retake-btn">Chụp lại</button>
+        <button type="button" class="cam-pill send" id="cam-send-btn">Gửi ảnh ➤</button>
       </div>
     </div>
   </div>
 
-  <!-- Màn hình Gọi & Filter -->
-  <div id="call-overlay">
-    <video id="remote-video" autoplay playsinline></video>
-    <video id="raw-local-video" autoplay playsinline muted style="display:none"></video>
-
-    <div id="local-preview-wrap">
-      <canvas id="local-canvas"></canvas>
-    </div>
-
+  <!-- Gọi Thoại / Video -->
+  <div id="call-overlay" class="full-overlay">
+    <video id="remote-video" class="full-media" autoplay playsinline muted></video>
+    <audio id="remote-audio" autoplay playsinline></audio>
+    <button type="button" class="cam-round-btn" id="call-pip-btn" title="Thu nhỏ / PiP">⌄</button>
+    <div id="local-preview-wrap"><video id="local-video" class="mirror" autoplay playsinline muted></video></div>
     <div id="call-top-info">
       <div class="call-avatar-big" id="call-avatar-big">E</div>
       <div id="call-peer-name">Em</div>
       <div id="call-status-label">Đang kết nối...</div>
     </div>
-
-    <div id="call-bottom-area">
-      <div class="filter-scroll-bar" id="filter-bar">
-        <button type="button" class="filter-chip off-btn" data-filter="none">🚫 Tắt Filter</button>
-        <button type="button" class="filter-chip active" data-filter="phaelo85">✨ Phaelo 85</button>
-        <button type="button" class="filter-chip" data-filter="peach">🍑 Hồng Đào</button>
-        <button type="button" class="filter-chip" data-filter="milky">🥛 Trắng Sữa</button>
-        <button type="button" class="filter-chip" data-filter="vintage">🎞️ Film Ấm</button>
-        <button type="button" class="filter-chip" data-filter="bw">🖤 Đen Trắng</button>
-      </div>
-
+    <div class="overlay-bottom">
       <div class="call-controls" id="active-call-controls">
-        <button type="button" class="c-btn" id="toggle-filter-btn" title="Bật/Tắt nhanh Filter">✨</button>
-        <button type="button" class="c-btn" id="flip-cam-btn" title="Lật camera">🔄</button>
-        <button type="button" class="c-btn" id="toggle-mic-btn" title="Tắt/Bật mic">🎙️</button>
-        <button type="button" class="c-btn" id="toggle-cam-btn" title="Tắt/Bật cam">📷</button>
-        <button type="button" class="c-btn end-call" id="hangup-btn" title="Kết thúc">📵</button>
+        <button type="button" class="c-btn" id="flip-cam-btn">🔄</button>
+        <button type="button" class="c-btn" id="toggle-mic-btn">🎙️</button>
+        <button type="button" class="c-btn" id="toggle-cam-btn">📷</button>
+        <button type="button" class="c-btn end-call" id="hangup-btn">📵</button>
       </div>
-
       <div class="call-controls" id="incoming-call-controls" style="display:none;">
-        <button type="button" class="c-btn end-call" id="reject-call-btn" title="Từ chối">✖️</button>
-        <button type="button" class="c-btn accept-call" id="accept-call-btn" title="Nghe máy">📞</button>
+        <button type="button" class="c-btn end-call" id="reject-call-btn">✖️</button>
+        <button type="button" class="c-btn accept-call" id="accept-call-btn">📞</button>
       </div>
     </div>
   </div>
 
-  <script>
-    var currentRole = localStorage.getItem("chat_role") || "Anh";
-    var allMessages = [];
-    var isInitialLoad = true;
-    var lastNotifiedMsgId = localStorage.getItem("last_notified_id") || "";
-
-    var roomSettings = {
-      nameAnh: "Anh",
-      nameEm: "Em",
-      themeIndex: 0,
-      bgImage: "",
-      typingAnh: 0,
-      typingEm: 0,
-      lastSeenAnh: 0,
-      lastSeenEm: 0,
-      onlineAnh: false,
-      onlineEm: false,
-      lastTkbNotifyDate: ""
-    };
-
-    // Hàm áp dụng bộ lọc màu dùng chung cho cả Camera chụp ảnh và Gọi Video
-    function drawFilteredFrame(ctx, videoEl, w, h, filterName, mirror) {
-      ctx.save();
-      if (mirror) {
-        ctx.translate(w, 0);
-        ctx.scale(-1, 1);
-      }
-
-      if (filterName === "phaelo85") {
-        ctx.filter = "brightness(1.08) contrast(0.95) saturate(1.08) sepia(0.08)";
-      } else if (filterName === "peach") {
-        ctx.filter = "brightness(1.07) contrast(0.97) saturate(1.18)";
-      } else if (filterName === "milky") {
-        ctx.filter = "brightness(1.13) contrast(0.92) saturate(0.94)";
-      } else if (filterName === "vintage") {
-        ctx.filter = "brightness(1.03) contrast(1.05) sepia(0.24) saturate(1.1)";
-      } else if (filterName === "bw") {
-        ctx.filter = "grayscale(1) contrast(1.12) brightness(1.05)";
-      } else {
-        ctx.filter = "none";
-      }
-
-      ctx.drawImage(videoEl, 0, 0, w, h);
-      ctx.filter = "none";
-
-      if (filterName === "phaelo85" || filterName === "milky") {
-        ctx.save();
-        ctx.globalAlpha = 0.22;
-        ctx.globalCompositeOperation = "screen";
-        ctx.filter = "blur(10px)";
-        ctx.drawImage(videoEl, 0, 0, w, h);
-        ctx.restore();
-      }
-      ctx.restore();
-    }
-
-    // Dữ liệu Thời Khóa Biểu
-    var TKB_DATA = {
-      anh: {
-        name: "Mai Xuân Anh",
-        days: {
-          1: [
-            { tiet: "Tiết 1 (09:20–10:50)", mon: "CAD実習II (Phòng 241)" },
-            { tiet: "Tiết 2 (11:00–12:30)", mon: "CAD実習II (Phòng 241)" },
-            { tiet: "Tiết 3 (13:20–14:50)", mon: "CD系ゼミII (Phòng 311)" },
-            { tiet: "Tiết 4 (15:00–16:30)", mon: "業界研究I (Phòng 311)" }
-          ],
-          2: [
-            { tiet: "Tiết 1 (09:20–10:50)", mon: "グラフィックデザインB (Phòng 311)" },
-            { tiet: "Tiết 2 (11:00–12:30)", mon: "グラフィックデザインB (Phòng 311)" },
-            { tiet: "Tiết 3 (13:20–14:50)", mon: "MOS Word B (Phòng 261)" },
-            { tiet: "Tiết 4 (15:00–16:30)", mon: "Unity開発実習B (Phòng 341)" }
-          ],
-          3: [
-            { tiet: "Tiết 1 (09:20–10:50)", mon: "Photoshop II (Phòng 343)" },
-            { tiet: "Tiết 2 (11:00–12:30)", mon: "Photoshop II (Phòng 343)" },
-            { tiet: "Tiết 3 (13:20–14:50)", mon: "C#実習基礎B (Phòng 262)" },
-            { tiet: "Tiết 4 (15:00–16:30)", mon: "C#実習基礎B (Phòng 262)" }
-          ],
-          4: [
-            { tiet: "Tiết 1 (09:20–10:50)", mon: "Illustrator II (Phòng 343)" },
-            { tiet: "Tiết 2 (11:00–12:30)", mon: "Illustrator II (Phòng 343)" },
-            { tiet: "Tiết 3 (13:20–14:50)", mon: "CD系ゼミII (Phòng 311)" },
-            { tiet: "Tiết 4 (15:00–16:30)", mon: "商業デザインI (Phòng 311)" }
-          ],
-          5: [
-            { tiet: "Tiết 3 (13:20–14:50)", mon: "CD系ゼミII (Phòng 311)" }
-          ],
-          6: [],
-          0: []
-        }
-      },
-      em: {
-        name: "Trần Phương Em",
-        days: {
-          1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 0: []
-        }
-      }
-    };
-
-    function buildTomorrowScheduleText() {
-      var now = new Date();
-      var tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      var dayIdx = tomorrow.getDay();
-      var dayNames = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-      var dd = ("0" + tomorrow.getDate()).slice(-2);
-      var mm = ("0" + (tomorrow.getMonth() + 1)).slice(-2);
-      var yyyy = tomorrow.getFullYear();
-
-      function formatPerson(personObj) {
-        var list = personObj.days[dayIdx] || [];
-        var out = "👤 " + personObj.name + "\n";
-        out += "Có " + list.length + " tiết\n";
-        if (list.length > 0) {
-          list.forEach(function(item) {
-            out += "• " + item.tiet + ": " + item.mon + "\n";
-          });
-        }
-        return out.trim();
-      }
-
-      var header = "📅 LỊCH HỌC NGÀY MAI (" + dayNames[dayIdx] + ", ngày " + dd + "/" + mm + "/" + yyyy + ")\n\n";
-      return header + formatPerson(TKB_DATA.anh) + "\n\n" + formatPerson(TKB_DATA.em);
-    }
-
-    var themes = [
-      { main: "#0084ff", grad: "linear-gradient(135deg, #0099ff, #0066ff)" },
-      { main: "#ff2d55", grad: "linear-gradient(135deg, #ff5e7e, #ff2d55)" },
-      { main: "#8e44ad", grad: "linear-gradient(135deg, #a55eea, #7d3cff)" },
-      { main: "#2ecc71", grad: "linear-gradient(135deg, #2ed573, #1eae60)" },
-      { main: "#ff7f50", grad: "linear-gradient(135deg, #ff9f43, #ee5253)" },
-      { main: "#2f3542", grad: "linear-gradient(135deg, #57606f, #2f3542)" }
-    ];
-
-    var colorGrid = document.getElementById("color-grid");
-    themes.forEach(function(t, idx) {
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "color-swatch";
-      btn.style.background = t.grad;
-      btn.dataset.index = idx;
-      colorGrid.appendChild(btn);
-    });
-
-    function getDisplayName(roleKey) {
-      return roleKey === "Anh" ? (roomSettings.nameAnh || "Anh") : (roomSettings.nameEm || "Em");
-    }
-
-    function formatLastActive(lastSeenMs, isOnlineFlag) {
-      var now = Date.now();
-      if (isOnlineFlag && lastSeenMs && (now - lastSeenMs < 40000)) {
-        return { online: true, text: "Đang hoạt động" };
-      }
-      if (!lastSeenMs) {
-        return { online: false, text: "Ngoại tuyến" };
-      }
-      var diffSec = Math.max(1, Math.floor((now - lastSeenMs) / 1000));
-      if (diffSec < 60) {
-        return { online: false, text: "Hoạt động vừa xong" };
-      }
-      var diffMin = Math.floor(diffSec / 60);
-      if (diffMin < 60) {
-        return { online: false, text: "Hoạt động " + diffMin + " phút trước" };
-      }
-      var diffHour = Math.floor(diffMin / 60);
-      if (diffHour < 24) {
-        return { online: false, text: "Hoạt động " + diffHour + " giờ trước" };
-      }
-      var diffDay = Math.floor(diffHour / 24);
-      return { online: false, text: "Hoạt động " + diffDay + " ngày trước" };
-    }
-
-    function applyRoomSettings() {
-      var t = themes[roomSettings.themeIndex || 0] || themes[0];
-      document.documentElement.style.setProperty("--theme-main", t.main);
-      document.documentElement.style.setProperty("--theme-grad", t.grad);
-
-      document.querySelectorAll(".color-swatch").forEach(function(s, i) {
-        s.classList.toggle("active", i === (roomSettings.themeIndex || 0));
-      });
-
-      var nameAnh = getDisplayName("Anh");
-      var nameEm = getDisplayName("Em");
-      var otherRole = currentRole === "Anh" ? "Em" : "Anh";
-      var otherName = getDisplayName(otherRole);
-
-      document.getElementById("partner-name").textContent = otherName;
-      document.getElementById("partner-avatar").textContent = otherName.charAt(0).toUpperCase();
-      document.getElementById("typing-avatar").textContent = otherName.charAt(0).toUpperCase();
-      document.getElementById("choice-anh").textContent = nameAnh;
-      document.getElementById("choice-em").textContent = nameEm;
-      document.getElementById("rename-preview").textContent = nameAnh + " & " + nameEm;
-
-      document.getElementById("choice-anh").classList.toggle("active", currentRole === "Anh");
-      document.getElementById("choice-em").classList.toggle("active", currentRole === "Em");
-
-      if (roomSettings.bgImage) {
-        document.body.style.backgroundImage = "url(" + roomSettings.bgImage + ")";
-        document.getElementById("remove-bg-btn").style.display = "flex";
-      } else {
-        document.body.style.backgroundImage = "none";
-        document.getElementById("remove-bg-btn").style.display = "none";
-      }
-
-      var otherTypingTime = otherRole === "Anh" ? roomSettings.typingAnh : roomSettings.typingEm;
-      var isOtherTyping = otherTypingTime && (Date.now() - otherTypingTime < 4200);
-      var typingRow = document.getElementById("typing-bubble-row");
-      var statusText = document.getElementById("partner-status");
-      var onlineDot = document.getElementById("partner-online-dot");
-
-      var otherLastSeen = otherRole === "Anh" ? roomSettings.lastSeenAnh : roomSettings.lastSeenEm;
-      var otherOnlineFlag = otherRole === "Anh" ? roomSettings.onlineAnh : roomSettings.onlineEm;
-      var activity = formatLastActive(otherLastSeen, otherOnlineFlag);
-
-      onlineDot.classList.toggle("active", activity.online);
-
-      if (isOtherTyping) {
-        typingRow.style.display = "flex";
-        statusText.textContent = "Đang nhập...";
-        statusText.style.color = t.main;
-        var chatBox = document.getElementById("chat-box");
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } else {
-        typingRow.style.display = "none";
-        statusText.textContent = activity.text;
-        statusText.style.color = activity.online ? "#31a24c" : "#65676b";
-      }
-    }
-
-    function playNotificationSound() {
-      try {
-        var AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        var ctx = new AudioCtx();
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.18, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.36);
-      } catch (e) {}
-    }
-
-    var toastTimeout = null;
-    function triggerIncomingAlert(msg) {
-      var senderName = msg.sender === "SYSTEM" ? "Nhắc lịch học" : getDisplayName(msg.sender);
-      var previewText = msg.type === "image" ? "📷 Đã gửi một ảnh"
-                      : msg.type === "audio" ? "🎙️ Đã gửi tin nhắn thoại"
-                      : (msg.text || "Tin nhắn mới");
-
-      playNotificationSound();
-      if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
-
-      var toast = document.getElementById("inapp-toast");
-      document.getElementById("toast-av").textContent = senderName.charAt(0).toUpperCase();
-      document.getElementById("toast-title").textContent = senderName;
-      document.getElementById("toast-msg").textContent = previewText.split("\n")[0];
-      toast.classList.add("show");
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(function() { toast.classList.remove("show"); }, 4000);
-
-      if (document.hidden) {
-        document.title = "(1) " + senderName + ": " + previewText.slice(0, 25);
-        if ("Notification" in window && Notification.permission === "granted") {
-          try {
-            new Notification(senderName, { body: previewText });
-          } catch (e) {}
-        }
-      }
-    }
-
-    document.addEventListener("visibilitychange", function() {
-      if (!document.hidden) {
-        document.title = "Mét sê gi";
-      }
-    });
-
-    function escapeHTML(str) {
-      var div = document.createElement("div");
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    function renderMessages() {
-      var container = document.getElementById("messages-container");
-      container.innerHTML = "";
-
-      var lastMyMsgIndex = -1;
-      for (var j = allMessages.length - 1; j >= 0; j--) {
-        if (allMessages[j].sender === currentRole) {
-          lastMyMsgIndex = j;
-          break;
-        }
-      }
-
-      for (var i = 0; i < allMessages.length; i++) {
-        var msg = allMessages[i];
-
-        if (msg.sender === "SYSTEM" || msg.type === "schedule") {
-          var card = document.createElement("div");
-          card.className = "schedule-card";
-          var lines = escapeHTML(msg.text || "").split("\n");
-          var titleLine = lines.shift() || "📅 Lịch học ngày mai";
-          card.innerHTML = "<div class='schedule-card-header'>" + titleLine + "</div><div>" + lines.join("<br>") + "</div>";
-          container.appendChild(card);
-          continue;
-        }
-
-        var prevMsg = i > 0 ? allMessages[i - 1] : null;
-        var nextMsg = i < allMessages.length - 1 ? allMessages[i + 1] : null;
-
-        var isMe = msg.sender === currentRole;
-        var isFirstInGroup = !prevMsg || prevMsg.sender !== msg.sender;
-        var isLastInGroup = !nextMsg || nextMsg.sender !== msg.sender;
-
-        var group = document.createElement("div");
-        group.className = "msg-group " + (isMe ? "me" : "other") + (isFirstInGroup ? " new-block" : "");
-
-        var timeStr = "";
-        if (msg.timestamp && msg.timestamp.toDate) {
-          var d = msg.timestamp.toDate();
-          timeStr = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
-        }
-
-        if (!isMe && isFirstInGroup) {
-          var nameTag = document.createElement("div");
-          nameTag.className = "sender-name-tag";
-          nameTag.textContent = getDisplayName(msg.sender);
-          group.appendChild(nameTag);
-        }
-
-        var line = document.createElement("div");
-        line.className = "bubble-line";
-
-        if (!isMe) {
-          var av = document.createElement("div");
-          av.className = "mini-avatar" + (isLastInGroup ? "" : " hidden");
-          av.textContent = getDisplayName(msg.sender).charAt(0).toUpperCase();
-          line.appendChild(av);
-        }
-
-        var bubble = document.createElement("div");
-        bubble.className = "bubble";
-        if (msg.type === "image" && msg.media) {
-          bubble.classList.add("media-bubble");
-          bubble.innerHTML = "<img src='" + msg.media + "' alt='ảnh' />";
-        } else if (msg.type === "audio" && msg.media) {
-          bubble.innerHTML = "<audio controls playsinline src='" + msg.media + "'></audio>";
-        } else {
-          var txt = msg.text || "";
-          if (txt === "❤️") bubble.classList.add("heart-only");
-          bubble.innerHTML = escapeHTML(txt).replace(/\n/g, "<br>");
-        }
-
-        var meta = document.createElement("div");
-        meta.className = "msg-meta";
-        if (isMe && i === lastMyMsgIndex) {
-          meta.classList.add("show-always");
-          meta.textContent = (msg.seen ? "Đã xem" : "Đã nhận") + (timeStr ? " • " + timeStr : "");
-        } else {
-          meta.textContent = timeStr;
-        }
-
-        bubble.onclick = function(mEl) {
-          return function() {
-            if (!mEl.classList.contains("show-always")) {
-              mEl.style.display = mEl.style.display === "inline-block" ? "none" : "inline-block";
-            }
-          };
-        }(meta);
-
-        line.appendChild(bubble);
-        group.appendChild(line);
-        if (meta.textContent) group.appendChild(meta);
-        container.appendChild(group);
-      }
-
-      var chatBox = document.getElementById("chat-box");
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    var sheet = document.getElementById("settings-sheet");
-    var backdrop = document.getElementById("sheet-backdrop");
-    function openSheet() {
-      backdrop.style.display = "block";
-      setTimeout(function() { backdrop.style.opacity = "1"; sheet.classList.add("open"); }, 10);
-    }
-    function closeSheet() {
-      sheet.classList.remove("open");
-      backdrop.style.opacity = "0";
-      setTimeout(function() { backdrop.style.display = "none"; }, 260);
-    }
-    document.getElementById("open-settings-btn").onclick = openSheet;
-    backdrop.onclick = closeSheet;
-
-    function compressImage(file, maxW, quality, callback) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          var canvas = document.createElement("canvas");
-          var ratio = Math.min(maxW / img.width, 1);
-          canvas.width = img.width * ratio;
-          canvas.height = img.height * ratio;
-          var ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          callback(canvas.toDataURL("image/jpeg", quality));
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    setInterval(applyRoomSettings, 2000);
-    applyRoomSettings();
-  </script>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, runTransaction, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    const firebaseConfig = {
+    const $ = id => document.getElementById(id);
+    const db = getFirestore(initializeApp({
       apiKey: "AIzaSyC3F8UwljVUkAjV9FdnchYRjQgLdiYt_eA",
       authDomain: "message4703.firebaseapp.com",
       projectId: "message4703",
@@ -1321,814 +245,514 @@
       messagingSenderId: "155410397895",
       appId: "1:155410397895:web:88b66b3b3320b7d1261ce2",
       measurementId: "G-4PKTYX0S89"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    }));
     const messagesRef = collection(db, "messages");
     const roomDocRef = doc(db, "settings", "room");
     const callDocRef = doc(db, "calls", "active");
 
-    async function updateRoomSetting(data) {
+    let currentRole = localStorage.getItem("chat_role") || "Anh";
+    let allMessages = [], isInitialLoad = true, lastNotifiedMsgId = localStorage.getItem("last_notified_id") || "";
+    let room = { nameAnh: "Anh", nameEm: "Em", themeIndex: 0, bgImage: "", typingAnh: 0, typingEm: 0, lastSeenAnh: 0, lastSeenEm: 0, onlineAnh: false, onlineEm: false, lastTkbNotifyDate: "" };
+
+    // TKB rút gọn (0: CN, 1..6: T2..T7)
+    const TIMES = ["", "09:20–10:50", "11:00–12:30", "13:20–14:50", "15:00–16:30"];
+    const TKB = {
+      anh: {
+        name: "Mai Xuân Anh",
+        days: {
+          1: [[1,"CAD実習II (Phòng 241)"],[2,"CAD実習II (Phòng 241)"],[3,"CD系ゼミII (Phòng 311)"],[4,"業界研究I (Phòng 311)"]],
+          2: [[1,"グラフィックデザインB (Phòng 311)"],[2,"グラフィックデザインB (Phòng 311)"],[3,"MOS Word B (Phòng 261)"],[4,"Unity開発実習B (Phòng 341)"]],
+          3: [[1,"Photoshop II (Phòng 343)"],[2,"Photoshop II (Phòng 343)"],[3,"C#実習基礎B (Phòng 262)"],[4,"C#実習基礎B (Phòng 262)"]],
+          4: [[1,"Illustrator II (Phòng 343)"],[2,"Illustrator II (Phòng 343)"],[3,"CD系ゼミII (Phòng 311)"],[4,"商業デザインI (Phòng 311)"]],
+          5: [[3,"CD系ゼミII (Phòng 311)"]]
+        }
+      },
+      em: { name: "Trần Phương Em", days: {} }
+    };
+
+    const buildTomorrowTKB = () => {
+      const t = new Date(); t.setDate(t.getDate() + 1);
+      const d = t.getDay(), days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+      const pad = n => String(n).padStart(2, "0");
+      const fmt = p => {
+        const list = p.days[d] || [];
+        return `👤 ${p.name}\nCó ${list.length} tiết` + (list.length ? "\n" + list.map(([i, m]) => `• Tiết ${i} (${TIMES[i]}): ${m}`).join("\n") : "");
+      };
+      return `📅 LỊCH HỌC NGÀY MAI (${days[d]}, ngày ${pad(t.getDate())}/${pad(t.getMonth()+1)}/${t.getFullYear()})\n\n${fmt(TKB.anh)}\n\n${fmt(TKB.em)}`;
+    };
+
+    // Giao diện & Chủ đề
+    const themes = [
+      ["#0084ff", "linear-gradient(135deg,#0099ff,#0066ff)"],
+      ["#ff2d55", "linear-gradient(135deg,#ff5e7e,#ff2d55)"],
+      ["#8e44ad", "linear-gradient(135deg,#a55eea,#7d3cff)"],
+      ["#2ecc71", "linear-gradient(135deg,#2ed573,#1eae60)"],
+      ["#ff7f50", "linear-gradient(135deg,#ff9f43,#ee5253)"],
+      ["#2f3542", "linear-gradient(135deg,#57606f,#2f3542)"]
+    ];
+    themes.forEach(([, grad], idx) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "color-swatch"; b.style.background = grad;
+      b.onclick = () => updateRoom({ themeIndex: idx });
+      $("color-grid").appendChild(b);
+    });
+
+    const getName = r => r === "Anh" ? (room.nameAnh || "Anh") : (room.nameEm || "Em");
+    const otherRole = () => currentRole === "Anh" ? "Em" : "Anh";
+    const esc = s => { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; };
+    const updateRoom = data => setDoc(roomDocRef, data, { merge: true }).catch(() => {});
+
+    const formatActive = (ms, online) => {
+      const diff = Date.now() - ms;
+      if (online && ms && diff < 40000) return { online: true, text: "Đang hoạt động" };
+      if (!ms) return { online: false, text: "Ngoại tuyến" };
+      const m = Math.floor(diff / 60000);
+      if (m < 1) return { online: false, text: "Hoạt động vừa xong" };
+      if (m < 60) return { online: false, text: `Hoạt động ${m} phút trước` };
+      const h = Math.floor(m / 60);
+      return { online: false, text: h < 24 ? `Hoạt động ${h} giờ trước` : `Hoạt động ${Math.floor(h/24)} ngày trước` };
+    };
+
+    const applyUI = () => {
+      const [main, grad] = themes[room.themeIndex || 0] || themes[0];
+      document.documentElement.style.setProperty("--theme-main", main);
+      document.documentElement.style.setProperty("--theme-grad", grad);
+      document.querySelectorAll(".color-swatch").forEach((s, i) => s.classList.toggle("active", i === (room.themeIndex || 0)));
+
+      const oRole = otherRole(), oName = getName(oRole);
+      $("partner-name").textContent = oName;
+      $("partner-avatar").textContent = $("typing-avatar").textContent = oName[0].toUpperCase();
+      $("choice-anh").textContent = getName("Anh");
+      $("choice-em").textContent = getName("Em");
+      $("rename-preview").textContent = `${getName("Anh")} & ${getName("Em")}`;
+      $("choice-anh").classList.toggle("active", currentRole === "Anh");
+      $("choice-em").classList.toggle("active", currentRole === "Em");
+
+      document.body.style.backgroundImage = room.bgImage ? `url(${room.bgImage})` : "none";
+      $("remove-bg-btn").style.display = room.bgImage ? "flex" : "none";
+
+      const isTyping = (Date.now() - (room["typing" + oRole] || 0)) < 4200;
+      const act = formatActive(room["lastSeen" + oRole], room["online" + oRole]);
+      $("partner-online-dot").classList.toggle("active", act.online);
+      $("typing-bubble-row").style.display = isTyping ? "flex" : "none";
+      $("partner-status").textContent = isTyping ? "Đang nhập..." : act.text;
+      $("partner-status").style.color = isTyping ? main : (act.online ? "#31a24c" : "#65676b");
+      if (isTyping) $("chat-box").scrollTop = $("chat-box").scrollHeight;
+    };
+
+    // Âm thanh & Thông báo
+    const playTing = () => {
       try {
-        await setDoc(roomDocRef, data, { merge: true });
-      } catch (e) {}
-    }
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.setValueAtTime(880, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + .12);
+        g.gain.setValueAtTime(.18, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .35);
+        o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime + .36);
+      } catch {}
+    };
 
-    function updateMyPresence(isOnline) {
-      const seenField = window.currentRole === "Anh" ? "lastSeenAnh" : "lastSeenEm";
-      const onlineField = window.currentRole === "Anh" ? "onlineAnh" : "onlineEm";
-      updateRoomSetting({
-        [seenField]: Date.now(),
-        [onlineField]: isOnline
-      });
-    }
-
-    updateMyPresence(true);
-    setInterval(() => {
-      if (!document.hidden) updateMyPresence(true);
-    }, 15000);
-
-    document.addEventListener("visibilitychange", () => {
+    let toastTimer;
+    const alertIncoming = msg => {
+      const name = msg.sender === "SYSTEM" ? "Nhắc lịch học" : getName(msg.sender);
+      const preview = msg.type === "image" ? "📷 Đã gửi một ảnh" : (msg.text || "Tin nhắn mới");
+      playTing();
+      navigator.vibrate?.([120, 60, 120]);
+      $("toast-av").textContent = name[0].toUpperCase();
+      $("toast-title").textContent = name;
+      $("toast-msg").textContent = preview.split("\n")[0];
+      $("inapp-toast").classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("inapp-toast").classList.remove("show"), 4000);
       if (document.hidden) {
-        updateMyPresence(false);
-      } else {
-        updateMyPresence(true);
-        markUnreadAsSeen();
-      }
-    });
-    window.addEventListener("beforeunload", () => updateMyPresence(false));
-
-    async function checkAndSendDailySchedule(forceNow = false) {
-      const now = new Date();
-      if (!forceNow && now.getHours() < 23) return;
-
-      const todayKey = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
-      if (!forceNow && window.roomSettings.lastTkbNotifyDate === todayKey) return;
-
-      try {
-        let shouldPost = false;
-        await runTransaction(db, async (transaction) => {
-          const sfDoc = await transaction.get(roomDocRef);
-          const data = sfDoc.exists() ? sfDoc.data() : {};
-          if (forceNow || data.lastTkbNotifyDate !== todayKey) {
-            transaction.set(roomDocRef, { lastTkbNotifyDate: todayKey }, { merge: true });
-            shouldPost = true;
-          }
-        });
-
-        if (shouldPost) {
-          const scheduleMsg = window.buildTomorrowScheduleText();
-          await addDoc(messagesRef, {
-            sender: "SYSTEM",
-            type: "schedule",
-            text: scheduleMsg,
-            seen: true,
-            timestamp: serverTimestamp()
-          });
+        document.title = `(1) ${name}: ${preview.slice(0, 25)}`;
+        if ("Notification" in window && Notification.permission === "granted") {
+          try { new Notification(name, { body: preview }); } catch {}
         }
-      } catch (e) {}
-    }
-
-    setInterval(() => checkAndSendDailySchedule(false), 20000);
-
-    onSnapshot(roomDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        window.roomSettings = { ...window.roomSettings, ...docSnap.data() };
-        window.applyRoomSettings();
-        window.renderMessages();
-        checkAndSendDailySchedule(false);
       }
-    });
+    };
+    $("inapp-toast").onclick = () => $("inapp-toast").classList.remove("show");
 
-    function markUnreadAsSeen() {
-      if (document.hidden) return;
-      window.allMessages.forEach(async (m) => {
-        if (m.sender !== window.currentRole && m.sender !== "SYSTEM" && !m.seen) {
-          try {
-            await updateDoc(doc(db, "messages", m.id), { seen: true });
-          } catch (e) {}
+    // Hiển thị tin nhắn
+    const renderMessages = () => {
+      const box = $("messages-container");
+      box.innerHTML = "";
+      const lastMyIdx = allMessages.map(m => m.sender).lastIndexOf(currentRole);
+
+      allMessages.forEach((msg, i) => {
+        if (msg.sender === "SYSTEM" || msg.type === "schedule") {
+          const lines = esc(msg.text || "").split("\n");
+          const card = document.createElement("div");
+          card.className = "schedule-card";
+          card.innerHTML = `<div class="schedule-card-header">${lines.shift() || "📅 Lịch học"}</div><div>${lines.join("<br>")}</div>`;
+          return box.appendChild(card);
         }
-      });
-    }
+        const isMe = msg.sender === currentRole;
+        const isFirst = !allMessages[i-1] || allMessages[i-1].sender !== msg.sender;
+        const isLast = !allMessages[i+1] || allMessages[i+1].sender !== msg.sender;
+        const timeStr = msg.timestamp?.toDate ? msg.timestamp.toDate().toTimeString().slice(0, 5) : "";
 
-    onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), (snapshot) => {
-      const newList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      if (!window.isInitialLoad && newList.length > 0) {
-        const latest = newList[newList.length - 1];
-        if (latest.id !== window.lastNotifiedMsgId && latest.sender !== window.currentRole) {
-          window.lastNotifiedMsgId = latest.id;
-          localStorage.setItem("last_notified_id", latest.id);
-          window.triggerIncomingAlert(latest);
-        }
-      } else if (newList.length > 0) {
-        window.lastNotifiedMsgId = newList[newList.length - 1].id;
-      }
-      window.isInitialLoad = false;
-      window.allMessages = newList;
-      window.renderMessages();
-      markUnreadAsSeen();
-    });
+        const grp = document.createElement("div");
+        grp.className = `msg-group ${isMe ? "me" : "other"}${isFirst ? " new-block" : ""}`;
+        if (!isMe && isFirst) grp.innerHTML = `<div class="sender-name-tag">${esc(getName(msg.sender))}</div>`;
 
-    const notifPermBtn = document.getElementById("notif-perm-btn");
-    const notifStatusText = document.getElementById("notif-status-text");
-    if ("Notification" in window && Notification.permission === "granted") {
-      notifStatusText.textContent = "Đã bật ✓";
-    }
-    notifPermBtn.onclick = async () => {
-      window.playNotificationSound();
-      if ("Notification" in window) {
-        const perm = await Notification.requestPermission();
-        notifStatusText.textContent = perm === "granted" ? "Đã bật ✓" : "Chưa cấp quyền";
-      } else {
-        alert("Đã bật âm thanh & thông báo nổi trong ứng dụng!");
-      }
-    };
+        const line = document.createElement("div");
+        line.className = "bubble-line";
+        if (!isMe) line.innerHTML = `<div class="mini-avatar${isLast ? "" : " hidden"}">${esc(getName(msg.sender)[0].toUpperCase())}</div>`;
 
-    document.getElementById("send-tkb-now-btn").onclick = async () => {
-      await checkAndSendDailySchedule(true);
-      window.closeSheet();
-    };
-
-    function switchRole(role) {
-      updateMyPresence(false);
-      window.currentRole = role;
-      localStorage.setItem("chat_role", role);
-      updateMyPresence(true);
-      window.applyRoomSettings();
-      window.renderMessages();
-      markUnreadAsSeen();
-    }
-    document.getElementById("choice-anh").onclick = () => switchRole("Anh");
-    document.getElementById("choice-em").onclick = () => switchRole("Em");
-
-    document.querySelectorAll(".color-swatch").forEach(btn => {
-      btn.onclick = async () => {
-        const idx = parseInt(btn.dataset.index, 10);
-        await updateRoomSetting({ themeIndex: idx });
-      };
-    });
-
-    document.getElementById("rename-btn").onclick = async () => {
-      const newAnh = prompt("Biệt danh của Anh:", window.roomSettings.nameAnh || "Anh");
-      if (newAnh === null) return;
-      const newEm = prompt("Biệt danh của Em:", window.roomSettings.nameEm || "Em");
-      if (newEm === null) return;
-      await updateRoomSetting({
-        nameAnh: newAnh.trim() || "Anh",
-        nameEm: newEm.trim() || "Em"
-      });
-    };
-
-    document.getElementById("bg-btn").onclick = () => document.getElementById("bg-input").click();
-    document.getElementById("bg-input").onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      window.compressImage(file, 720, 0.55, async (dataUrl) => {
-        if (dataUrl.length > 850000) {
-          alert("Ảnh nền quá nặng, hãy chọn ảnh khác nhẹ hơn!");
-          return;
-        }
-        await updateRoomSetting({ bgImage: dataUrl });
-        window.closeSheet();
-      });
-      e.target.value = "";
-    };
-
-    document.getElementById("remove-bg-btn").onclick = async () => {
-      await updateRoomSetting({ bgImage: "" });
-      window.closeSheet();
-    };
-
-    const msgInput = document.getElementById("msg-input");
-    const sendBtn = document.getElementById("send-btn");
-    let lastTypingSent = 0;
-
-    msgInput.addEventListener("input", () => {
-      msgInput.style.height = "auto";
-      msgInput.style.height = Math.min(msgInput.scrollHeight, 96) + "px";
-      sendBtn.textContent = msgInput.value.trim() ? "➤" : "❤️";
-
-      const now = Date.now();
-      if (now - lastTypingSent > 2000) {
-        lastTypingSent = now;
-        const field = window.currentRole === "Anh" ? "typingAnh" : "typingEm";
-        updateRoomSetting({ [field]: now });
-      }
-    });
-
-    async function sendPayload(payload) {
-      const typingField = window.currentRole === "Anh" ? "typingAnh" : "typingEm";
-      try {
-        await addDoc(messagesRef, {
-          sender: window.currentRole,
-          seen: false,
-          timestamp: serverTimestamp(),
-          ...payload
-        });
-        await updateRoomSetting({ [typingField]: 0 });
-      } catch (e) {
-        alert("Lỗi gửi tin: " + e.message);
-      }
-    }
-
-    async function handleSend() {
-      const text = msgInput.value.trim();
-      if (!text) {
-        await sendPayload({ type: "text", text: "❤️" });
-        return;
-      }
-      msgInput.value = "";
-      msgInput.style.height = "auto";
-      sendBtn.textContent = "❤️";
-      await sendPayload({ type: "text", text: text });
-    }
-
-    sendBtn.onclick = handleSend;
-    msgInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    });
-
-    document.getElementById("img-btn").onclick = () => document.getElementById("img-input").click();
-    document.getElementById("img-input").onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      window.compressImage(file, 720, 0.65, async (dataUrl) => {
-        await sendPayload({ type: "image", media: dataUrl });
-      });
-      e.target.value = "";
-    };
-
-    // ==========================================
-    // CAMERA CHỤP ẢNH TRỰC TIẾP CÓ FILTER
-    // ==========================================
-    const camModal = document.getElementById("cam-modal");
-    const camRawVideo = document.getElementById("cam-raw-video");
-    const camCanvas = document.getElementById("cam-canvas");
-    const camCtx = camCanvas.getContext("2d");
-    const camPreviewImg = document.getElementById("cam-preview-img");
-    const camShutterRow = document.getElementById("cam-shutter-row");
-    const camConfirmRow = document.getElementById("cam-confirm-row");
-    const camFilterBar = document.getElementById("cam-filter-bar");
-
-    let camStream = null;
-    let camLoopId = null;
-    let camFacing = "user";
-    let camFilter = "sigma";
-    let capturedDataUrl = "";
-    let camFaceLandmarker = null;
-    let camLastVideoTime = -1;
-    let camCachedLandmarks = null;
-
-    async function initCamFaceLandmarker() {
-      if (camFaceLandmarker) return;
-      try {
-        const vision = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
-        const fileset = await vision.FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
-        );
-        camFaceLandmarker = await vision.FaceLandmarker.createFromOptions(fileset, {
-          baseOptions: {
-            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-            delegate: "GPU"
-          },
-          runningMode: "VIDEO",
-          numFaces: 1
-        });
-      } catch (e) {
-        console.warn("Lỗi tải nhận diện khuôn mặt:", e);
-      }
-    }
-
-    function applySigmaEffect(ctx, landmarks, w, h, mirror) {
-      const getPt = (idx) => {
-        const p = landmarks[idx];
-        return { x: (mirror ? (1 - p.x) : p.x) * w, y: p.y * h };
-      };
-
-      const leftFace = getPt(234);
-      const rightFace = getPt(454);
-      const faceW = Math.hypot(rightFace.x - leftFace.x, rightFace.y - leftFace.y);
-
-      // 1. Đánh khối hóp má (Mewing / Hollow Cheeks)
-      const leftCheek = getPt(205);
-      const rightCheek = getPt(425);
-      const cheekR = Math.max(22, faceW * 0.2);
-
-      ctx.save();
-      ctx.globalCompositeOperation = "multiply";
-      [leftCheek, rightCheek].forEach(pt => {
-        const grad = ctx.createRadialGradient(pt.x, pt.y, 2, pt.x, pt.y, cheekR);
-        grad.addColorStop(0, "rgba(75, 45, 30, 0.52)");
-        grad.addColorStop(0.6, "rgba(95, 60, 40, 0.22)");
-        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(pt.x, pt.y, cheekR, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // 2. Nếp nhăn nhíu mày giữa trán (Sigma Frown)
-      const browCenter = getPt(9);
-      const frownR = Math.max(10, faceW * 0.08);
-      const frownGrad = ctx.createRadialGradient(browCenter.x, browCenter.y, 1, browCenter.x, browCenter.y, frownR);
-      frownGrad.addColorStop(0, "rgba(65, 35, 25, 0.45)");
-      frownGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = frownGrad;
-      ctx.beginPath();
-      ctx.arc(browCenter.x, browCenter.y, frownR, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 3. Nhấn sắc nét lông mày nhíu góc cạnh
-      const drawSigmaBrow = (indices) => {
-        ctx.beginPath();
-        indices.forEach((id, i) => {
-          const p = getPt(id);
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        });
-        ctx.strokeStyle = "rgba(25, 18, 15, 0.45)";
-        ctx.lineWidth = Math.max(3, faceW * 0.025);
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.filter = "blur(1.5px)";
-        ctx.stroke();
-      };
-      drawSigmaBrow([70, 63, 105, 66, 107]);
-      drawSigmaBrow([300, 293, 334, 296, 336]);
-      ctx.restore();
-
-      // 4. Điểm sáng gò má & môi chu (Highlight)
-      const lipCenter = getPt(14);
-      const lipR = Math.max(12, faceW * 0.09);
-      ctx.save();
-      ctx.globalCompositeOperation = "soft-light";
-      const lipGrad = ctx.createRadialGradient(lipCenter.x, lipCenter.y, 1, lipCenter.x, lipCenter.y, lipR);
-      lipGrad.addColorStop(0, "rgba(255, 210, 200, 0.45)");
-      lipGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
-      ctx.fillStyle = lipGrad;
-      ctx.beginPath();
-      ctx.arc(lipCenter.x, lipCenter.y, lipR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function renderCamLoop() {
-      if (camRawVideo && camRawVideo.readyState >= 2) {
-        const w = camRawVideo.videoWidth || 720;
-        const h = camRawVideo.videoHeight || 960;
-        if (camCanvas.width !== w || camCanvas.height !== h) {
-          camCanvas.width = w;
-          camCanvas.height = h;
-        }
-        const isMirror = camFacing === "user";
-
-        if (camFilter === "sigma") {
-          camCtx.save();
-          if (isMirror) {
-            camCtx.translate(w, 0);
-            camCtx.scale(-1, 1);
-          }
-          camCtx.filter = "contrast(1.18) saturate(1.06) brightness(0.98)";
-          camCtx.drawImage(camRawVideo, 0, 0, w, h);
-          camCtx.filter = "none";
-          camCtx.restore();
-
-          if (camFaceLandmarker) {
-            if (camRawVideo.currentTime !== camLastVideoTime) {
-              camLastVideoTime = camRawVideo.currentTime;
-              const res = camFaceLandmarker.detectForVideo(camRawVideo, performance.now());
-              camCachedLandmarks = res.faceLandmarks?.[0] || null;
-            }
-            if (camCachedLandmarks) {
-              applySigmaEffect(camCtx, camCachedLandmarks, w, h, isMirror);
-            }
-          }
+        const b = document.createElement("div");
+        b.className = "bubble";
+        if (msg.type === "image" && msg.media) {
+          b.classList.add("media-bubble");
+          b.innerHTML = `<img src="${msg.media}" alt="ảnh"/>`;
         } else {
-          window.drawFilteredFrame(camCtx, camRawVideo, w, h, camFilter, isMirror);
+          const txt = msg.text || "";
+          if (txt === "❤️") b.classList.add("heart-only");
+          b.innerHTML = esc(txt).replace(/\n/g, "<br>");
         }
-      }
-      camLoopId = requestAnimationFrame(renderCamLoop);
-    }
 
-    async function startCameraModal() {
-      try {
-        if (camStream) camStream.getTracks().forEach(t => t.stop());
-        camStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: camFacing, width: { ideal: 960 }, height: { ideal: 1280 } },
-          audio: false
-        });
-        camRawVideo.srcObject = camStream;
-        await camRawVideo.play();
-        initCamFaceLandmarker();
-        camModal.style.display = "flex";
-        resetCamToLive();
-        if (camLoopId) cancelAnimationFrame(camLoopId);
-        renderCamLoop();
-      } catch (err) {
-        alert("Không thể mở camera: " + err.message);
-      }
-    }
+        const meta = document.createElement("div");
+        meta.className = "msg-meta" + (isMe && i === lastMyIdx ? " show-always" : "");
+        meta.textContent = isMe && i === lastMyIdx ? `${msg.seen ? "Đã xem" : "Đã nhận"}${timeStr ? " • " + timeStr : ""}` : timeStr;
+        b.onclick = () => { if (!meta.classList.contains("show-always")) meta.style.display = meta.style.display === "inline-block" ? "none" : "inline-block"; };
 
-    function resetCamToLive() {
-      capturedDataUrl = "";
-      camPreviewImg.style.display = "none";
-      camShutterRow.style.display = "flex";
-      camConfirmRow.style.display = "none";
-      camFilterBar.style.display = "flex";
-    }
-
-    function closeCameraModal() {
-      if (camLoopId) cancelAnimationFrame(camLoopId);
-      if (camStream) camStream.getTracks().forEach(t => t.stop());
-      camStream = null;
-      camModal.style.display = "none";
-    }
-
-    document.getElementById("open-cam-btn").onclick = startCameraModal;
-    document.getElementById("cam-close-btn").onclick = closeCameraModal;
-
-    document.getElementById("cam-flip-btn").onclick = () => {
-      camFacing = camFacing === "user" ? "environment" : "user";
-      startCameraModal();
+        line.appendChild(b);
+        grp.appendChild(line);
+        if (meta.textContent) grp.appendChild(meta);
+        box.appendChild(grp);
+      });
+      $("chat-box").scrollTop = $("chat-box").scrollHeight;
     };
 
-    document.querySelectorAll("[data-camfilter]").forEach(btn => {
-      btn.onclick = () => {
-        camFilter = btn.dataset.camfilter;
-        document.querySelectorAll("[data-camfilter]").forEach(b => {
-          b.classList.toggle("active", b.dataset.camfilter === camFilter);
-        });
-      };
+    // Presence & Nhắc lịch 23:00
+    const setPresence = on => updateRoom({ ["lastSeen" + currentRole]: Date.now(), ["online" + currentRole]: on });
+    const markSeen = () => {
+      if (document.hidden) return;
+      allMessages.forEach(m => {
+        if (m.sender !== currentRole && m.sender !== "SYSTEM" && !m.seen) updateDoc(doc(db, "messages", m.id), { seen: true }).catch(() => {});
+      });
+    };
+
+    const checkDailyTKB = async (force = false) => {
+      const now = new Date();
+      if (!force && now.getHours() < 23) return;
+      const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+      if (!force && room.lastTkbNotifyDate === key) return;
+      try {
+        const snap = await getDoc(roomDocRef);
+        if (!force && snap.data()?.lastTkbNotifyDate === key) { room.lastTkbNotifyDate = key; return; }
+        await setDoc(roomDocRef, { lastTkbNotifyDate: key }, { merge: true });
+        room.lastTkbNotifyDate = key;
+        await addDoc(messagesRef, { sender: "SYSTEM", type: "schedule", text: buildTomorrowTKB(), seen: true, timestamp: serverTimestamp() });
+      } catch {}
+    };
+
+    setPresence(true);
+    setInterval(() => { applyUI(); if (!document.hidden) setPresence(true); checkDailyTKB(false); }, 15000);
+    setInterval(applyUI, 2500);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) setPresence(false);
+      else { document.title = "Mét sê gi"; setPresence(true); markSeen(); }
+    });
+    window.addEventListener("beforeunload", () => setPresence(false));
+
+    onSnapshot(roomDocRef, snap => {
+      if (snap.exists()) { room = { ...room, ...snap.data() }; applyUI(); renderMessages(); checkDailyTKB(false); }
+    });
+    onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), snap => {
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const latest = list[list.length - 1];
+      if (!isInitialLoad && latest && latest.id !== lastNotifiedMsgId && latest.sender !== currentRole) {
+        lastNotifiedMsgId = latest.id;
+        localStorage.setItem("last_notified_id", latest.id);
+        alertIncoming(latest);
+      } else if (latest) lastNotifiedMsgId = latest.id;
+      isInitialLoad = false; allMessages = list; renderMessages(); markSeen();
     });
 
-    document.getElementById("cam-shutter-btn").onclick = () => {
-      const maxW = 720;
-      const ratio = Math.min(maxW / camCanvas.width, 1);
-      const outCanvas = document.createElement("canvas");
-      outCanvas.width = camCanvas.width * ratio;
-      outCanvas.height = camCanvas.height * ratio;
-      outCanvas.getContext("2d").drawImage(camCanvas, 0, 0, outCanvas.width, outCanvas.height);
+    // Bottom Sheet & Cài đặt
+    const openSheet = () => { $("sheet-backdrop").style.display = "block"; setTimeout(() => { $("sheet-backdrop").style.opacity = "1"; $("settings-sheet").classList.add("open"); }, 10); };
+    const closeSheet = () => { $("settings-sheet").classList.remove("open"); $("sheet-backdrop").style.opacity = "0"; setTimeout(() => $("sheet-backdrop").style.display = "none", 260); };
+    $("open-settings-btn").onclick = openSheet;
+    $("sheet-backdrop").onclick = closeSheet;
 
-      capturedDataUrl = outCanvas.toDataURL("image/jpeg", 0.68);
-      camPreviewImg.src = capturedDataUrl;
-      camPreviewImg.style.display = "block";
-      camShutterRow.style.display = "none";
-      camFilterBar.style.display = "none";
-      camConfirmRow.style.display = "flex";
+    const switchRole = r => { setPresence(false); currentRole = r; localStorage.setItem("chat_role", r); setPresence(true); applyUI(); renderMessages(); markSeen(); };
+    $("choice-anh").onclick = () => switchRole("Anh");
+    $("choice-em").onclick = () => switchRole("Em");
+
+    if ("Notification" in window && Notification.permission === "granted") $("notif-status-text").textContent = "Đã bật ✓";
+    $("notif-perm-btn").onclick = async () => {
+      playTing();
+      if ("Notification" in window) $("notif-status-text").textContent = (await Notification.requestPermission()) === "granted" ? "Đã bật ✓" : "Chưa cấp quyền";
     };
-
-    document.getElementById("cam-retake-btn").onclick = resetCamToLive;
-
-    document.getElementById("cam-send-btn").onclick = async () => {
-      if (!capturedDataUrl) return;
-      const imgToSend = capturedDataUrl;
-      closeCameraModal();
-      await sendPayload({ type: "image", media: imgToSend });
+    $("send-tkb-now-btn").onclick = async () => { await checkDailyTKB(true); closeSheet(); };
+    $("rename-btn").onclick = () => {
+      const a = prompt("Biệt danh của Anh:", getName("Anh")); if (a === null) return;
+      const e = prompt("Biệt danh của Em:", getName("Em")); if (e === null) return;
+      updateRoom({ nameAnh: a.trim() || "Anh", nameEm: e.trim() || "Em" });
     };
-
-    // Ghi âm Voice
-    let mediaRecorder = null;
-    let audioChunks = [];
-    const voiceBtn = document.getElementById("voice-btn");
-
-    voiceBtn.onclick = async () => {
-      if (mediaRecorder && mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-        voiceBtn.classList.remove("recording");
-        return;
-      }
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) audioChunks.push(e.data);
-        };
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || "audio/mp4" });
-          if (blob.size > 700000) {
-            alert("Đoạn ghi âm tối đa khoảng 25 giây, hãy ghi ngắn hơn nhé!");
-            return;
-          }
-          const reader = new FileReader();
-          reader.onloadend = async () => {
-            await sendPayload({ type: "audio", media: reader.result });
-          };
-          reader.readAsDataURL(blob);
-        };
-        mediaRecorder.start();
-        voiceBtn.classList.add("recording");
-      } catch (err) {
-        alert("Không bật được micro: " + err.message);
-      }
-    };
-
-    document.getElementById("clear-btn").onclick = async () => {
+    $("remove-bg-btn").onclick = async () => { await updateRoom({ bgImage: "" }); closeSheet(); };
+    $("clear-btn").onclick = async () => {
       if (!confirm("Xóa sạch toàn bộ cuộc trò chuyện của cả 2 người?")) return;
-      try {
-        const snap = await getDocs(messagesRef);
-        await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "messages", d.id))));
-        window.closeSheet();
-      } catch (e) {
-        alert("Lỗi khi xóa: " + e.message);
-      }
+      const snap = await getDocs(messagesRef);
+      await Promise.all(snap.docs.map(d => deleteDoc(doc(db, "messages", d.id))));
+      closeSheet();
     };
 
-    // ==========================================
-    // HỆ THỐNG GỌI VIDEO / THOẠI WEBRTC + FILTER
-    // ==========================================
-    const rtcConfig = {
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" }
-      ]
+    // Gửi tin nhắn & Ảnh thư viện
+    const sendPayload = async data => {
+      await addDoc(messagesRef, { sender: currentRole, seen: false, timestamp: serverTimestamp(), ...data });
+      updateRoom({ ["typing" + currentRole]: 0 });
     };
 
-    let pc = null;
-    let rawStream = null;
-    let processedStream = null;
-    let isVideoCall = true;
-    let facingMode = "user";
-    let activeFilter = "phaelo85";
-    let lastActiveFilter = "phaelo85";
-    let renderLoopId = null;
-    let isMicMuted = false;
-    let isCamOff = false;
-    let callTimer = null;
-    let callSeconds = 0;
-
-    const callOverlay = document.getElementById("call-overlay");
-    const rawVideo = document.getElementById("raw-local-video");
-    const localCanvas = document.getElementById("local-canvas");
-    const canvasCtx = localCanvas.getContext("2d");
-    const remoteVideo = document.getElementById("remote-video");
-
-    function startVideoFilterLoop() {
-      if (renderLoopId) cancelAnimationFrame(renderLoopId);
-      function renderFrame() {
-        if (!rawVideo || rawVideo.readyState < 2) {
-          renderLoopId = requestAnimationFrame(renderFrame);
-          return;
-        }
-        const w = rawVideo.videoWidth || 480;
-        const h = rawVideo.videoHeight || 640;
-        if (localCanvas.width !== w || localCanvas.height !== h) {
-          localCanvas.width = w;
-          localCanvas.height = h;
-        }
-        window.drawFilteredFrame(canvasCtx, rawVideo, w, h, activeFilter, facingMode === "user");
-        renderLoopId = requestAnimationFrame(renderFrame);
-      }
-      renderFrame();
-    }
-
-    function updateFilterUI() {
-      document.querySelectorAll("[data-filter]").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.filter === activeFilter);
-      });
-      const toggleBtn = document.getElementById("toggle-filter-btn");
-      toggleBtn.style.background = activeFilter === "none" ? "rgba(255,255,255,0.2)" : "#fff";
-      toggleBtn.style.color = activeFilter === "none" ? "#fff" : "#050505";
-    }
-
-    document.querySelectorAll("[data-filter]").forEach(btn => {
-      btn.onclick = () => {
-        activeFilter = btn.dataset.filter;
-        if (activeFilter !== "none") lastActiveFilter = activeFilter;
-        updateFilterUI();
+    const compressFile = (file, maxW, q, cb) => {
+      const r = new FileReader();
+      r.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement("canvas"), ratio = Math.min(maxW / img.width, 1);
+          c.width = img.width * ratio; c.height = img.height * ratio;
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          cb(c.toDataURL("image/jpeg", q));
+        };
+        img.src = e.target.result;
       };
-    });
-
-    document.getElementById("toggle-filter-btn").onclick = () => {
-      if (activeFilter === "none") {
-        activeFilter = lastActiveFilter || "phaelo85";
-      } else {
-        lastActiveFilter = activeFilter;
-        activeFilter = "none";
-      }
-      updateFilterUI();
+      r.readAsDataURL(file);
     };
 
-    async function setupLocalMedia(videoEnabled) {
-      if (rawStream) rawStream.getTracks().forEach(t => t.stop());
-      rawStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: videoEnabled ? { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } } : false
+    let lastType = 0;
+    $("msg-input").oninput = e => {
+      const el = e.target;
+      el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 96) + "px";
+      $("send-btn").textContent = el.value.trim() ? "➤" : "❤️";
+      if (Date.now() - lastType > 2000) { lastType = Date.now(); updateRoom({ ["typing" + currentRole]: lastType }); }
+    };
+    const handleSend = () => {
+      const t = $("msg-input").value.trim();
+      $("msg-input").value = ""; $("msg-input").style.height = "auto"; $("send-btn").textContent = "❤️";
+      sendPayload({ type: "text", text: t || "❤️" });
+    };
+    $("send-btn").onclick = handleSend;
+    $("msg-input").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+
+    $("bg-btn").onclick = () => $("bg-input").click();
+    $("bg-input").onchange = e => {
+      if (e.target.files[0]) compressFile(e.target.files[0], 720, .55, async url => {
+        if (url.length > 850000) return alert("Ảnh nền quá nặng!");
+        await updateRoom({ bgImage: url }); closeSheet();
       });
+      e.target.value = "";
+    };
+    $("img-btn").onclick = () => $("img-input").click();
+    $("img-input").onchange = e => {
+      if (e.target.files[0]) compressFile(e.target.files[0], 720, .65, url => sendPayload({ type: "image", media: url }));
+      e.target.value = "";
+    };
 
-      if (videoEnabled) {
-        rawVideo.srcObject = rawStream;
-        await rawVideo.play();
-        startVideoFilterLoop();
-        const canvasStream = localCanvas.captureStream(24);
-        const audioTrack = rawStream.getAudioTracks()[0];
-        if (audioTrack) canvasStream.addTrack(audioTrack);
-        processedStream = canvasStream;
-        document.getElementById("local-preview-wrap").style.display = "block";
-        document.getElementById("filter-bar").style.display = "flex";
-        document.getElementById("toggle-filter-btn").style.display = "flex";
-        document.getElementById("flip-cam-btn").style.display = "flex";
-      } else {
-        processedStream = rawStream;
-        document.getElementById("local-preview-wrap").style.display = "none";
-        document.getElementById("filter-bar").style.display = "none";
-        document.getElementById("toggle-filter-btn").style.display = "none";
-        document.getElementById("flip-cam-btn").style.display = "none";
-      }
-    }
+    // Camera chụp ảnh trực tiếp (không filter)
+    let camStream = null, camFacing = "user", capturedImg = "";
+    const resetCamUI = () => {
+      capturedImg = "";
+      $("cam-preview-img").style.display = "none";
+      $("cam-shutter-row").style.display = "flex";
+      $("cam-confirm-row").style.display = "none";
+    };
+    const closeCam = () => { camStream?.getTracks().forEach(t => t.stop()); camStream = null; $("cam-modal").style.display = "none"; };
+    const openCam = async () => {
+      $("cam-modal").style.display = "flex"; resetCamUI();
+      try {
+        camStream?.getTracks().forEach(t => t.stop());
+        try { camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing, width: { ideal: 960 } }, audio: false }); }
+        catch { camStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false }); }
+        $("cam-video").classList.toggle("mirror", camFacing === "user");
+        $("cam-video").srcObject = camStream;
+        await $("cam-video").play();
+      } catch (err) { closeCam(); alert("Không thể mở camera: " + err.message); }
+    };
 
-    function openCallScreen(peerName, statusText, incoming) {
-      callOverlay.style.display = "flex";
-      document.getElementById("call-peer-name").textContent = peerName;
-      document.getElementById("call-avatar-big").textContent = peerName.charAt(0).toUpperCase();
-      document.getElementById("call-status-label").textContent = statusText;
-      document.getElementById("active-call-controls").style.display = incoming ? "none" : "flex";
-      document.getElementById("incoming-call-controls").style.display = incoming ? "flex" : "none";
-      updateFilterUI();
-    }
+    $("open-cam-btn").onclick = openCam;
+    $("cam-close-btn").onclick = closeCam;
+    $("cam-flip-btn").onclick = () => { camFacing = camFacing === "user" ? "environment" : "user"; openCam(); };
+    $("cam-retake-btn").onclick = resetCamUI;
+    $("cam-shutter-btn").onclick = () => {
+      const v = $("cam-video"), c = document.createElement("canvas");
+      const ratio = Math.min(720 / (v.videoWidth || 720), 1);
+      c.width = (v.videoWidth || 720) * ratio; c.height = (v.videoHeight || 960) * ratio;
+      const ctx = c.getContext("2d");
+      if (camFacing === "user") { ctx.translate(c.width, 0); ctx.scale(-1, 1); }
+      ctx.drawImage(v, 0, 0, c.width, c.height);
+      capturedImg = c.toDataURL("image/jpeg", .68);
+      $("cam-preview-img").src = capturedImg;
+      $("cam-preview-img").style.display = "block";
+      $("cam-shutter-row").style.display = "none";
+      $("cam-confirm-row").style.display = "flex";
+    };
+    $("cam-send-btn").onclick = () => { if (!capturedImg) return; const img = capturedImg; closeCam(); sendPayload({ type: "image", media: img }); };
 
-    function startCallTimer() {
-      clearInterval(callTimer);
-      callSeconds = 0;
-      callTimer = setInterval(() => {
-        callSeconds++;
-        const m = String(Math.floor(callSeconds / 60)).padStart(2, "0");
-        const s = String(callSeconds % 60).padStart(2, "0");
-        document.getElementById("call-status-label").textContent = `${m}:${s}`;
-        if (isVideoCall) document.getElementById("call-top-info").style.opacity = "0.65";
-      }, 1000);
-    }
+    // Gọi Thoại / Video WebRTC trực tiếp phần cứng + Thu nhỏ PiP & Chạy nền
+    const rtcCfg = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
+    let pc = null, localStream = null, unsubCands = null, isVideoCall = true, callFacing = "user", callTimer = null, callSec = 0;
 
-    async function cleanupCall(clearFirestore = true) {
-      clearInterval(callTimer);
-      if (renderLoopId) cancelAnimationFrame(renderLoopId);
-      if (rawStream) rawStream.getTracks().forEach(t => t.stop());
-      if (pc) { pc.close(); pc = null; }
-      rawStream = null;
-      processedStream = null;
-      remoteVideo.srcObject = null;
-      callOverlay.style.display = "none";
-      document.getElementById("call-top-info").style.opacity = "1";
-      isMicMuted = false;
-      isCamOff = false;
-      document.getElementById("toggle-mic-btn").classList.remove("muted");
-      document.getElementById("toggle-cam-btn").classList.remove("muted");
+    const getCallMedia = async video => {
+      localStream?.getTracks().forEach(t => t.stop());
+      const vOpt = { facingMode: callFacing, width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24 } };
+      try { localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: video ? vOpt : false }); }
+      catch { localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video }); }
+      $("local-video").srcObject = video ? localStream : null;
+      $("local-video").classList.toggle("mirror", callFacing === "user");
+      $("local-preview-wrap").style.display = video ? "block" : "none";
+      $("flip-cam-btn").style.display = $("toggle-cam-btn").style.display = video ? "flex" : "none";
+    };
 
-      if (clearFirestore) {
+    const showCallUI = (name, status, incoming) => {
+      $("call-overlay").style.display = "flex";
+      $("call-peer-name").textContent = name;
+      $("call-avatar-big").textContent = name[0].toUpperCase();
+      $("call-status-label").textContent = status;
+      $("active-call-controls").style.display = incoming ? "none" : "flex";
+      $("incoming-call-controls").style.display = incoming ? "flex" : "none";
+    };
+
+    const exitPiP = () => {
+      const rv = $("remote-video");
+      if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {});
+      else if (rv.webkitPresentationMode === "picture-in-picture") rv.webkitSetPresentationMode("inline");
+    };
+
+    const cleanupCall = async (clearDB = true) => {
+      exitPiP();
+      clearInterval(callTimer); callTimer = null;
+      unsubCands?.(); unsubCands = null;
+      localStream?.getTracks().forEach(t => t.stop()); localStream = null;
+      pc?.close(); pc = null;
+      $("remote-video").srcObject = $("remote-audio").srcObject = $("local-video").srcObject = null;
+      $("call-overlay").style.display = $("mini-call-bar").style.display = "none";
+      $("call-top-info").style.opacity = "1";
+      $("toggle-mic-btn").classList.remove("muted");
+      $("toggle-cam-btn").classList.remove("muted");
+      if (clearDB) {
         try {
-          const offerCands = await getDocs(collection(db, "calls", "active", "offerCandidates"));
-          await Promise.all(offerCands.docs.map(d => deleteDoc(d.ref)));
-          const answerCands = await getDocs(collection(db, "calls", "active", "answerCandidates"));
-          await Promise.all(answerCands.docs.map(d => deleteDoc(d.ref)));
+          for (const sub of ["offerCandidates", "answerCandidates"]) {
+            const s = await getDocs(collection(db, "calls", "active", sub));
+            await Promise.all(s.docs.map(d => deleteDoc(d.ref)));
+          }
           await deleteDoc(callDocRef);
-        } catch (e) {}
+        } catch {}
       }
-    }
+    };
 
-    function createPeerConnection(isCaller) {
-      pc = new RTCPeerConnection(rtcConfig);
-      processedStream.getTracks().forEach(track => pc.addTrack(track, processedStream));
-
-      const remoteStream = new MediaStream();
-      remoteVideo.srcObject = remoteStream;
-      pc.ontrack = (event) => {
-        event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-        startCallTimer();
-      };
-
-      const candCol = collection(db, "calls", "active", isCaller ? "offerCandidates" : "answerCandidates");
-      pc.onicecandidate = (event) => {
-        if (event.candidate) addDoc(candCol, event.candidate.toJSON());
-      };
-
-      pc.onconnectionstatechange = () => {
-        if (pc && (pc.connectionState === "disconnected" || pc.connectionState === "failed" || pc.connectionState === "closed")) {
-          cleanupCall(false);
+    const initPC = isCaller => {
+      pc = new RTCPeerConnection(rtcCfg);
+      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      const remV = new MediaStream(), remA = new MediaStream();
+      $("remote-video").srcObject = remV;
+      $("remote-audio").srcObject = remA;
+      pc.ontrack = e => {
+        (e.track.kind === "audio" ? remA : remV).addTrack(e.track);
+        $("remote-audio").play().catch(() => {});
+        if ("mediaSession" in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({ title: "Đang gọi với " + getName(otherRole()), artist: "Mét sê gi" });
+        }
+        if (!callTimer) {
+          callSec = 0;
+          callTimer = setInterval(() => {
+            callSec++;
+            const t = `${String(Math.floor(callSec/60)).padStart(2,"0")}:${String(callSec%60).padStart(2,"0")}`;
+            $("call-status-label").textContent = $("mini-call-time").textContent = t;
+            if (isVideoCall) $("call-top-info").style.opacity = ".65";
+          }, 1000);
         }
       };
-    }
+      const col = collection(db, "calls", "active", isCaller ? "offerCandidates" : "answerCandidates");
+      pc.onicecandidate = e => { if (e.candidate) addDoc(col, e.candidate.toJSON()); };
+      pc.onconnectionstatechange = () => { if (pc && ["disconnected","failed","closed"].includes(pc.connectionState)) cleanupCall(false); };
+    };
 
-    async function initiateCall(videoMode) {
-      isVideoCall = videoMode;
-      const otherRole = window.currentRole === "Anh" ? "Em" : "Anh";
-      const peerName = window.getDisplayName(otherRole);
-
+    const startCall = async video => {
+      isVideoCall = video;
       try {
-        await setupLocalMedia(videoMode);
-        openCallScreen(peerName, "Đang đổ chuông...", false);
-        createPeerConnection(true);
-
-        const offerDesc = await pc.createOffer();
-        await pc.setLocalDescription(offerDesc);
-
-        await setDoc(callDocRef, {
-          caller: window.currentRole,
-          callee: otherRole,
-          video: videoMode,
-          status: "ringing",
-          offer: { type: offerDesc.type, sdp: offerDesc.sdp },
-          timestamp: Date.now()
+        await getCallMedia(video);
+        showCallUI(getName(otherRole()), "Đang đổ chuông...", false);
+        initPC(true);
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        await setDoc(callDocRef, { caller: currentRole, callee: otherRole(), video, status: "ringing", offer: { type: offer.type, sdp: offer.sdp }, timestamp: Date.now() });
+        unsubCands = onSnapshot(collection(db, "calls", "active", "answerCandidates"), s => {
+          s.docChanges().forEach(c => { if (c.type === "added" && pc?.remoteDescription) pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); });
         });
+      } catch (err) { alert("Không thể mở camera/micro: " + err.message); cleanupCall(true); }
+    };
 
-        onSnapshot(collection(db, "calls", "active", "answerCandidates"), (snap) => {
-          snap.docChanges().forEach((change) => {
-            if (change.type === "added" && pc && pc.remoteDescription) {
-              pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-            }
-          });
-        });
-      } catch (err) {
-        alert("Không thể mở camera/micro: " + err.message);
-        cleanupCall(true);
-      }
-    }
+    $("audio-call-btn").onclick = () => startCall(false);
+    $("video-call-btn").onclick = () => startCall(true);
+    $("reject-call-btn").onclick = $("hangup-btn").onclick = () => cleanupCall(true);
 
-    document.getElementById("audio-call-btn").onclick = () => initiateCall(false);
-    document.getElementById("video-call-btn").onclick = () => initiateCall(true);
-
-    onSnapshot(callDocRef, async (snap) => {
-      if (!snap.exists()) {
-        if (callOverlay.style.display === "flex") cleanupCall(false);
-        return;
-      }
-      const data = snap.data();
-      if (Date.now() - data.timestamp > 60000 && data.status === "ringing") {
-        cleanupCall(true);
-        return;
-      }
-      if (data.caller === window.currentRole && data.answer && pc && !pc.currentRemoteDescription) {
-        await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-      }
-      if (data.callee === window.currentRole && data.status === "ringing" && callOverlay.style.display !== "flex") {
-        isVideoCall = data.video;
-        const callerName = window.getDisplayName(data.caller);
-        openCallScreen(callerName, data.video ? "Cuộc gọi video đến..." : "Cuộc gọi thoại đến...", true);
+    onSnapshot(callDocRef, async snap => {
+      if (!snap.exists()) { if (pc || $("call-overlay").style.display === "flex") cleanupCall(false); return; }
+      const d = snap.data();
+      if (Date.now() - d.timestamp > 60000 && d.status === "ringing") return cleanupCall(true);
+      if (d.caller === currentRole && d.answer && pc && !pc.currentRemoteDescription) await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+      if (d.callee === currentRole && d.status === "ringing" && $("call-overlay").style.display !== "flex") {
+        isVideoCall = d.video;
+        showCallUI(getName(d.caller), d.video ? "Cuộc gọi video đến..." : "Cuộc gọi thoại đến...", true);
       }
     });
 
-    document.getElementById("accept-call-btn").onclick = async () => {
+    $("accept-call-btn").onclick = async () => {
       try {
-        const snap = await getDoc(callDocRef);
-        if (!snap.exists()) return;
-        const data = snap.data();
-
-        await setupLocalMedia(data.video);
-        document.getElementById("incoming-call-controls").style.display = "none";
-        document.getElementById("active-call-controls").style.display = "flex";
-        document.getElementById("call-status-label").textContent = "Đang kết nối...";
-
-        createPeerConnection(false);
-        await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-        const answerDesc = await pc.createAnswer();
-        await pc.setLocalDescription(answerDesc);
-
-        await updateDoc(callDocRef, {
-          status: "connected",
-          answer: { type: answerDesc.type, sdp: answerDesc.sdp }
+        const snap = await getDoc(callDocRef); if (!snap.exists()) return;
+        const d = snap.data();
+        await getCallMedia(d.video);
+        $("incoming-call-controls").style.display = "none";
+        $("active-call-controls").style.display = "flex";
+        $("call-status-label").textContent = "Đang kết nối...";
+        initPC(false);
+        await pc.setRemoteDescription(new RTCSessionDescription(d.offer));
+        const ans = await pc.createAnswer();
+        await pc.setLocalDescription(ans);
+        await updateDoc(callDocRef, { status: "connected", answer: { type: ans.type, sdp: ans.sdp } });
+        unsubCands = onSnapshot(collection(db, "calls", "active", "offerCandidates"), s => {
+          s.docChanges().forEach(c => { if (c.type === "added" && pc) pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); });
         });
-
-        onSnapshot(collection(db, "calls", "active", "offerCandidates"), (cSnap) => {
-          cSnap.docChanges().forEach((change) => {
-            if (change.type === "added" && pc) {
-              pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
-            }
-          });
-        });
-      } catch (err) {
-        alert("Lỗi nhận cuộc gọi: " + err.message);
-        cleanupCall(true);
-      }
+      } catch (err) { alert("Lỗi nhận cuộc gọi: " + err.message); cleanupCall(true); }
     };
 
-    document.getElementById("reject-call-btn").onclick = () => cleanupCall(true);
-    document.getElementById("hangup-btn").onclick = () => cleanupCall(true);
-
-    document.getElementById("flip-cam-btn").onclick = async () => {
+    $("flip-cam-btn").onclick = async () => {
       if (!isVideoCall || !pc) return;
-      facingMode = facingMode === "user" ? "environment" : "user";
-      await setupLocalMedia(true);
-      const videoTrack = processedStream.getVideoTracks()[0];
-      const sender = pc.getSenders().find(s => s.track && s.track.kind === "video");
-      if (sender && videoTrack) sender.replaceTrack(videoTrack);
+      callFacing = callFacing === "user" ? "environment" : "user";
+      await getCallMedia(true);
+      const track = localStream.getVideoTracks()[0];
+      const sender = pc.getSenders().find(s => s.track?.kind === "video");
+      if (sender && track) sender.replaceTrack(track);
+    };
+    $("toggle-mic-btn").onclick = e => {
+      const muted = e.currentTarget.classList.toggle("muted");
+      localStream?.getAudioTracks().forEach(t => t.enabled = !muted);
+    };
+    $("toggle-cam-btn").onclick = e => {
+      const off = e.currentTarget.classList.toggle("muted");
+      localStream?.getVideoTracks().forEach(t => t.enabled = !off);
     };
 
-    document.getElementById("toggle-mic-btn").onclick = function() {
-      isMicMuted = !isMicMuted;
-      if (rawStream) rawStream.getAudioTracks().forEach(t => t.enabled = !isMicMuted);
-      this.classList.toggle("muted", isMicMuted);
+    $("call-pip-btn").onclick = async () => {
+      const rv = $("remote-video");
+      if (isVideoCall && rv.readyState >= 2) {
+        try {
+          if (rv.webkitSupportsPresentationMode?.("picture-in-picture")) rv.webkitSetPresentationMode("picture-in-picture");
+          else if (document.pictureInPictureEnabled && rv.requestPictureInPicture) await rv.requestPictureInPicture();
+        } catch {}
+      }
+      $("call-overlay").style.display = "none";
+      $("mini-call-bar").style.display = "flex";
+    };
+    $("mini-call-bar").onclick = () => {
+      exitPiP();
+      $("mini-call-bar").style.display = "none";
+      $("call-overlay").style.display = "flex";
     };
 
-    document.getElementById("toggle-cam-btn").onclick = function() {
-      isCamOff = !isCamOff;
-      if (rawStream) rawStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
-      this.classList.toggle("muted", isCamOff);
-    };
+    applyUI();
   </script>
 </body>
 </html>
