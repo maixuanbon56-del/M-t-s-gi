@@ -14,8 +14,8 @@
     body { display: flex; flex-direction: column; background-size: cover; background-position: center; background-repeat: no-repeat; }
 
     /* Thông báo nổi */
-    #inapp-toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; background: rgba(28,28,30,.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #fff; padding: 12px 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.28); z-index: 200; display: flex; align-items: center; gap: 12px; transform: translateY(-140%); transition: transform .3s cubic-bezier(.2,.9,.3,1); cursor: pointer; }
-    #inapp-toast.show { transform: translateY(0); }
+    #inapp-toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 12px; right: 12px; background: rgba(28,28,30,.94); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: #fff; padding: 12px 16px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.28); z-index: 200; display: flex; align-items: center; gap: 12px; transform: translateY(-300%); opacity: 0; pointer-events: none; transition: transform .3s cubic-bezier(.2,.9,.3,1), opacity .25s; cursor: pointer; }
+    #inapp-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
     .toast-av { width: 36px; height: 36px; border-radius: 50%; background: var(--theme-grad); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
     .toast-body { min-width: 0; flex: 1; }
     .toast-title { font-size: 13.5px; font-weight: 700; }
@@ -121,6 +121,7 @@
     .c-btn.accept-call { background: #31a24c; width: 62px; height: 62px; font-size: 24px; }
     #mini-call-bar { display: none; background: #31a24c; color: #fff; padding: 8px 14px; font-size: 13.5px; font-weight: 600; justify-content: space-between; align-items: center; cursor: pointer; z-index: 19; }
     #call-pip-btn { position: absolute; top: calc(env(safe-area-inset-top) + 16px); left: 16px; z-index: 7; font-size: 22px; }
+    #call-overlay.minimized { opacity: 0; pointer-events: none; z-index: -1; }
   </style>
 </head>
 <body>
@@ -207,10 +208,11 @@
     </div>
   </div>
 
+  <audio id="remote-audio" autoplay playsinline></audio>
+
   <!-- Gọi Thoại / Video -->
   <div id="call-overlay" class="full-overlay">
     <video id="remote-video" class="full-media" autoplay playsinline muted></video>
-    <audio id="remote-audio" autoplay playsinline></audio>
     <button type="button" class="cam-round-btn" id="call-pip-btn" title="Thu nhỏ / PiP">⌄</button>
     <div id="local-preview-wrap"><video id="local-video" class="mirror" autoplay playsinline muted></video></div>
     <div id="call-top-info">
@@ -500,10 +502,21 @@
       closeSheet();
     };
 
-    // Gửi tin nhắn & Ảnh thư viện
+    // Thông báo đẩy qua ntfy (khóa màn hình vẫn báo) & Gửi tin nhắn
+    const NTFY = { Anh: "metsegi-anh-7492", Em: "metsegi-em-7492" };
+    const pushNtfy = (title, message, priority = 4) => {
+      const topic = NTFY[otherRole()];
+      if (!topic) return;
+      fetch("https://ntfy.sh", {
+        method: "POST",
+        body: JSON.stringify({ topic, title, message, priority })
+      }).catch(() => {});
+    };
+
     const sendPayload = async data => {
       await addDoc(messagesRef, { sender: currentRole, seen: false, timestamp: serverTimestamp(), ...data });
       updateRoom({ ["typing" + currentRole]: 0 });
+      pushNtfy(getName(currentRole), data.type === "image" ? "📷 Đã gửi một ảnh" : (data.text || "Tin nhắn mới"), 4);
     };
 
     const compressFile = (file, maxW, q, cb) => {
@@ -628,6 +641,7 @@
       pc?.close(); pc = null;
       $("remote-video").srcObject = $("remote-audio").srcObject = $("local-video").srcObject = null;
       $("call-overlay").style.display = $("mini-call-bar").style.display = "none";
+      $("call-overlay").classList.remove("minimized");
       $("call-top-info").style.opacity = "1";
       $("toggle-mic-btn").classList.remove("muted");
       $("toggle-cam-btn").classList.remove("muted");
@@ -678,6 +692,7 @@
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         await setDoc(callDocRef, { caller: currentRole, callee: otherRole(), video, status: "ringing", offer: { type: offer.type, sdp: offer.sdp }, timestamp: Date.now() });
+        pushNtfy(getName(currentRole), video ? "📹 Cuộc gọi video đến..." : "📞 Cuộc gọi thoại đến...", 5);
         unsubCands = onSnapshot(collection(db, "calls", "active", "answerCandidates"), s => {
           s.docChanges().forEach(c => { if (c.type === "added" && pc?.remoteDescription) pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); });
         });
@@ -743,14 +758,32 @@
           else if (document.pictureInPictureEnabled && rv.requestPictureInPicture) await rv.requestPictureInPicture();
         } catch {}
       }
-      $("call-overlay").style.display = "none";
+      $("call-overlay").classList.add("minimized");
       $("mini-call-bar").style.display = "flex";
     };
     $("mini-call-bar").onclick = () => {
       exitPiP();
       $("mini-call-bar").style.display = "none";
-      $("call-overlay").style.display = "flex";
+      $("call-overlay").classList.remove("minimized");
     };
+
+    // Tự khôi phục micro & loa nếu iOS tạm ngắt khi chuyển app
+    document.addEventListener("visibilitychange", async () => {
+      if (document.hidden || !pc) return;
+      $("remote-audio").play().catch(() => {});
+      const oldTrack = localStream?.getAudioTracks()[0];
+      if (!oldTrack || oldTrack.readyState === "ended" || oldTrack.muted) {
+        try {
+          const fresh = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const newTrack = fresh.getAudioTracks()[0];
+          newTrack.enabled = !$("toggle-mic-btn").classList.contains("muted");
+          const sender = pc.getSenders().find(s => s.track?.kind === "audio");
+          if (sender) await sender.replaceTrack(newTrack);
+          if (oldTrack) { localStream.removeTrack(oldTrack); oldTrack.stop(); }
+          localStream?.addTrack(newTrack);
+        } catch {}
+      }
+    });
 
     applyUI();
   </script>
