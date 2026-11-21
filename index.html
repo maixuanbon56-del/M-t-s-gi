@@ -603,9 +603,35 @@
     };
     $("cam-send-btn").onclick = () => { if (!capturedImg) return; const img = capturedImg; closeCam(); sendPayload({ type: "image", media: img }); };
 
-    // Gọi Thoại / Video WebRTC trực tiếp phần cứng + Thu nhỏ PiP & Chạy nền
+    // Gọi Thoại / Video WebRTC trực tiếp phần cứng + Chuông reo liên tiếp + PiP & Chạy nền
     const rtcCfg = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
     let pc = null, localStream = null, unsubCands = null, isVideoCall = true, callFacing = "user", callTimer = null, callSec = 0;
+    let ringPushTimer = null, inAppRingTimer = null;
+
+    const stopRinging = () => {
+      clearInterval(ringPushTimer); ringPushTimer = null;
+      clearInterval(inAppRingTimer); inAppRingTimer = null;
+    };
+    const playRingPulse = () => {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.25].forEach(d => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.setValueAtTime(660, ctx.currentTime + d);
+          o.frequency.setValueAtTime(880, ctx.currentTime + d + 0.1);
+          g.gain.setValueAtTime(.22, ctx.currentTime + d);
+          g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + d + 0.22);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.23);
+        });
+      } catch {}
+      navigator.vibrate?.([300, 150, 300]);
+    };
+    const startInAppRing = () => {
+      stopRinging();
+      playRingPulse();
+      inAppRingTimer = setInterval(playRingPulse, 2000);
+    };
 
     const getCallMedia = async video => {
       localStream?.getTracks().forEach(t => t.stop());
@@ -635,6 +661,7 @@
 
     const cleanupCall = async (clearDB = true) => {
       exitPiP();
+      stopRinging();
       clearInterval(callTimer); callTimer = null;
       unsubCands?.(); unsubCands = null;
       localStream?.getTracks().forEach(t => t.stop()); localStream = null;
@@ -692,7 +719,14 @@
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
         await setDoc(callDocRef, { caller: currentRole, callee: otherRole(), video, status: "ringing", offer: { type: offer.type, sdp: offer.sdp }, timestamp: Date.now() });
-        pushNtfy(getName(currentRole), video ? "📹 Cuộc gọi video đến..." : "📞 Cuộc gọi thoại đến...", 5);
+        const ringMsg = video ? "📹 Cuộc gọi video đến..." : "📞 Cuộc gọi thoại đến...";
+        pushNtfy(getName(currentRole), ringMsg, 5);
+        let ringCount = 0;
+        clearInterval(ringPushTimer);
+        ringPushTimer = setInterval(() => {
+          if (++ringCount >= 7) return stopRinging();
+          pushNtfy(getName(currentRole), ringMsg, 5);
+        }, 3500);
         unsubCands = onSnapshot(collection(db, "calls", "active", "answerCandidates"), s => {
           s.docChanges().forEach(c => { if (c.type === "added" && pc?.remoteDescription) pc.addIceCandidate(new RTCIceCandidate(c.doc.data())); });
         });
@@ -707,15 +741,20 @@
       if (!snap.exists()) { if (pc || $("call-overlay").style.display === "flex") cleanupCall(false); return; }
       const d = snap.data();
       if (Date.now() - d.timestamp > 60000 && d.status === "ringing") return cleanupCall(true);
-      if (d.caller === currentRole && d.answer && pc && !pc.currentRemoteDescription) await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+      if (d.caller === currentRole && d.answer && pc && !pc.currentRemoteDescription) {
+        stopRinging();
+        await pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+      }
       if (d.callee === currentRole && d.status === "ringing" && $("call-overlay").style.display !== "flex") {
         isVideoCall = d.video;
         showCallUI(getName(d.caller), d.video ? "Cuộc gọi video đến..." : "Cuộc gọi thoại đến...", true);
+        startInAppRing();
       }
     });
 
     $("accept-call-btn").onclick = async () => {
       try {
+        stopRinging();
         const snap = await getDoc(callDocRef); if (!snap.exists()) return;
         const d = snap.data();
         await getCallMedia(d.video);
