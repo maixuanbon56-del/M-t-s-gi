@@ -236,7 +236,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, updateDoc, getDoc, runTransaction, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const $ = id => document.getElementById(id);
     const db = getFirestore(initializeApp({
@@ -261,6 +261,7 @@
     const TKB = {
       anh: {
         name: "Mai Xuân Anh",
+        showTime: true,
         days: {
           1: [[1,"CAD実習II (Phòng 241)"],[2,"CAD実習II (Phòng 241)"],[3,"CD系ゼミII (Phòng 311)"],[4,"業界研究I (Phòng 311)"]],
           2: [[1,"グラフィックデザインB (Phòng 311)"],[2,"グラフィックデザインB (Phòng 311)"],[3,"MOS Word B (Phòng 261)"],[4,"Unity開発実習B (Phòng 341)"]],
@@ -269,7 +270,16 @@
           5: [[3,"CD系ゼミII (Phòng 311)"]]
         }
       },
-      em: { name: "Trần Phương Em", days: {} }
+      em: {
+        name: "Trần Phương Em",
+        showTime: false,
+        days: {
+          1: [[2,"特講42 営業コミュニケーション"],[3,"災害と防災"],[4,"アルゴリズム論"]],
+          2: [[1,"日本語口頭表現"],[2,"生活と経済"],[3,"会計基礎II"],[4,"データサイエンス"]],
+          3: [[2,"フレッシュマンセミナー"],[3,"トレーニング演習"],[4,"事業計画論"]],
+          4: [[1,"キャリアデザインI"],[2,"日本語文章表現"],[4,"マーケティング基礎II"]]
+        }
+      }
     };
 
     const buildTomorrowTKB = () => {
@@ -278,7 +288,7 @@
       const pad = n => String(n).padStart(2, "0");
       const fmt = p => {
         const list = p.days[d] || [];
-        return `👤 ${p.name}\nCó ${list.length} tiết` + (list.length ? "\n" + list.map(([i, m]) => `• Tiết ${i} (${TIMES[i]}): ${m}`).join("\n") : "");
+        return `👤 ${p.name}\nCó ${list.length} tiết` + (list.length ? "\n" + list.map(([i, m]) => `• Tiết ${i}${p.showTime && TIMES[i] ? ` (${TIMES[i]})` : ""}: ${m}`).join("\n") : "");
       };
       return `📅 LỊCH HỌC NGÀY MAI (${days[d]}, ngày ${pad(t.getDate())}/${pad(t.getMonth()+1)}/${t.getFullYear()})\n\n${fmt(TKB.anh)}\n\n${fmt(TKB.em)}`;
     };
@@ -427,7 +437,7 @@
       $("chat-box").scrollTop = $("chat-box").scrollHeight;
     };
 
-    // Presence & Nhắc lịch 23:00
+    // Presence & Nhắc lịch 23:00 (khóa transaction: chỉ gửi đúng 1 lần/ngày trừ khi bấm thủ công)
     const setPresence = on => updateRoom({ ["lastSeen" + currentRole]: Date.now(), ["online" + currentRole]: on });
     const markSeen = () => {
       if (document.hidden) return;
@@ -436,18 +446,32 @@
       });
     };
 
+    let tkbChecking = false;
     const checkDailyTKB = async (force = false) => {
+      if (force) {
+        try {
+          await addDoc(messagesRef, { sender: "SYSTEM", type: "schedule", text: buildTomorrowTKB(), seen: true, timestamp: serverTimestamp() });
+        } catch {}
+        return;
+      }
       const now = new Date();
-      if (!force && now.getHours() < 23) return;
+      if (now.getHours() !== 23) return;
       const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-      if (!force && room.lastTkbNotifyDate === key) return;
+      if (tkbChecking || room.lastTkbNotifyDate === key || localStorage.getItem("tkb_sent_date") === key) return;
+      tkbChecking = true;
       try {
-        const snap = await getDoc(roomDocRef);
-        if (!force && snap.data()?.lastTkbNotifyDate === key) { room.lastTkbNotifyDate = key; return; }
-        await setDoc(roomDocRef, { lastTkbNotifyDate: key }, { merge: true });
+        const tkbMsgRef = doc(db, "messages", `tkb-${key}`);
+        await runTransaction(db, async tx => {
+          const [roomSnap, msgSnap] = await Promise.all([tx.get(roomDocRef), tx.get(tkbMsgRef)]);
+          if (roomSnap.data()?.lastTkbNotifyDate === key || msgSnap.exists()) return;
+          tx.set(roomDocRef, { lastTkbNotifyDate: key }, { merge: true });
+          tx.set(tkbMsgRef, { sender: "SYSTEM", type: "schedule", text: buildTomorrowTKB(), seen: true, timestamp: serverTimestamp() });
+        });
         room.lastTkbNotifyDate = key;
-        await addDoc(messagesRef, { sender: "SYSTEM", type: "schedule", text: buildTomorrowTKB(), seen: true, timestamp: serverTimestamp() });
-      } catch {}
+        localStorage.setItem("tkb_sent_date", key);
+      } catch {} finally {
+        tkbChecking = false;
+      }
     };
 
     setPresence(true);
@@ -460,7 +484,11 @@
     window.addEventListener("beforeunload", () => setPresence(false));
 
     onSnapshot(roomDocRef, snap => {
-      if (snap.exists()) { room = { ...room, ...snap.data() }; applyUI(); renderMessages(); checkDailyTKB(false); }
+      if (snap.exists()) {
+        room = { ...room, ...snap.data() };
+        if (room.lastTkbNotifyDate) localStorage.setItem("tkb_sent_date", room.lastTkbNotifyDate);
+        applyUI(); renderMessages(); checkDailyTKB(false);
+      }
     });
     onSnapshot(query(messagesRef, orderBy("timestamp", "asc")), snap => {
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
